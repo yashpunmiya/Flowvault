@@ -1,0 +1,40 @@
+[project]
+name = 'flowvault-contracts'
+description = ''
+authors = []
+telemetry = true
+cache_dir = '.\.cache'
+requirements = []
+[contracts.flowvault]
+path = 'contracts/flowvault.clar'
+clarity_version = 3
+epoch = 'latest'
+
+[contracts.mock-usdcx]
+path = 'contracts/mock-usdcx.clar'
+clarity_version = 3
+epoch = 'latest'
+
+[contracts.sip-010-trait]
+path = 'contracts/sip-010-trait.clar'
+clarity_version = 3
+epoch = 'latest'
+[repl.analysis]
+passes = [
+    'check_checker',
+    'call_checker',
+]
+
+[repl.analysis.lint_groups]
+
+[repl.analysis.lints]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
+
+[repl.remote_data]
+enabled = false
+api_url = 'https://api.hiro.so'

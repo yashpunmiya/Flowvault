@@ -1,0 +1,32 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: sip-010-trait
+            expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
+            cost: 9670
+            path: "contracts\\sip-010-trait.clar"
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: flowvault
+            expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
+            cost: 92300
+            path: "contracts\\flowvault.clar"
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: mock-usdcx
+            expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
+            cost: 24980
+            path: "contracts\\mock-usdcx.clar"
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.3"
