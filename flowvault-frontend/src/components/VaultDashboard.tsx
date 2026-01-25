@@ -17,7 +17,6 @@ export function VaultDashboard() {
     deposit,
     withdraw,
     clearRoutingRules,
-    requestFaucet,
   } = useFlowVault();
 
   const [usdcxBalance, setUsdcxBalance] = useState<number>(0);
@@ -121,13 +120,6 @@ export function VaultDashboard() {
     }
   };
 
-  const handleFaucet = async () => {
-    const success = await requestFaucet(1000 * 1e6); // 1000 USDCx
-    if (success) {
-      setTimeout(() => setRefreshKey((k) => k + 1), 2000);
-    }
-  };
-
   if (!wallet.isConnected) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 animate-fade-in">
@@ -181,13 +173,6 @@ export function VaultDashboard() {
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
                 Wallet
               </h3>
-              <button
-                onClick={handleFaucet}
-                disabled={isLoading}
-                className="px-2 py-1 rounded bg-green-500/10 border border-green-500/20 text-[10px] font-medium text-green-400 hover:bg-green-500/20 transition-colors"
-              >
-                Faucet
-              </button>
             </div>
             <div className="flex items-baseline gap-2 mt-2">
               <span className="text-2xl font-bold text-white tracking-tight">{formatBalance(usdcxBalance)}</span>
