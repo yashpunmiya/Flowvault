@@ -33,8 +33,8 @@ export default function Home() {
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">FlowVault</h1>
               <div className="flex items-center gap-2">
-                 <span className="w-1.5 h-1.5 rounded-full bg-[#00D67D]"></span>
-                 <p className="text-xs text-white/50 font-medium">Stacks Mainnet</p>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00D67D]"></span>
+                <p className="text-xs text-white/50 font-medium">Stacks Mainnet</p>
               </div>
             </div>
           </div>
@@ -42,32 +42,34 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section - Reduced Padding as requested */}
-      <section className="pt-16 pb-12 px-6 relative">
-        <div className="max-w-4xl mx-auto text-center space-y-6 animate-[fade-in_0.8s_ease-out]">
-          <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-[1.1]">
-            Programmable <br/>
+      {/* Hero Section - Compact */}
+      <section className="pt-10 pb-8 px-6 relative">
+        <div className="max-w-4xl mx-auto text-center space-y-4 animate-[fade-in_0.8s_ease-out]">
+          <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.1]">
+            Programmable <br />
             <span className="text-gradient-primary">
               USDCx Routing
             </span>
           </h2>
-          <p className="text-lg text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-base text-white/60 max-w-xl mx-auto font-light leading-relaxed">
             Secure, non-custodial vault management on Stacks. Automate your flows with on-chain rules.
+            <br />
+            <span className="text-primary/80 font-medium">FlowVault turns USDCx deposits into programmable on-chain actions.</span>
           </p>
-          
+
           {/* Feature Pills - Glass Style */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
-              <span className="text-primary">🔒</span>
-              <span className="text-sm font-medium">Time-Locked</span>
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+              <span className="text-primary text-xs">🔒</span>
+              <span className="text-xs font-medium">Time-Locked</span>
             </div>
-            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
-              <span className="text-purple-400">✂️</span>
-              <span className="text-sm font-medium">Auto-Split</span>
+            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+              <span className="text-purple-400 text-xs">✂️</span>
+              <span className="text-xs font-medium">Auto-Split</span>
             </div>
-            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
-              <span className="text-blue-400">⚡</span>
-              <span className="text-sm font-medium">Bitcoin Finality</span>
+            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+              <span className="text-blue-400 text-xs">⚡</span>
+              <span className="text-xs font-medium">Bitcoin Finality</span>
             </div>
           </div>
         </div>

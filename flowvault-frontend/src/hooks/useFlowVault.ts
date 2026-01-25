@@ -40,7 +40,7 @@ export function useFlowVault() {
   // Get USDCx balance for an address
   const getUsdcxBalance = useCallback(async (address: string): Promise<number> => {
     const { address: contractAddr, name: contractName } = parseContractId(CURRENT_CONTRACTS.usdcx);
-    
+
     try {
       const result: ClarityValue = await fetchCallReadOnlyFunction({
         contractAddress: contractAddr,
@@ -50,7 +50,7 @@ export function useFlowVault() {
         senderAddress: address,
         network: NETWORK,
       });
-      
+
       const value = cvToValue(result);
       // SIP-010 get-balance returns (response uint uint) - extract the value
       if (typeof value === "object" && "value" in value) {
@@ -64,10 +64,32 @@ export function useFlowVault() {
     }
   }, []);
 
+  // Helper to safely extract values from potential Clarity value wrappers or direct values
+  const safeNumber = (val: any): number => {
+    if (val === undefined || val === null) return 0;
+    if (typeof val === "bigint" || typeof val === "number") return Number(val);
+    if (typeof val === "string") return Number(val);
+    if (typeof val === "object") {
+      if ("value" in val) return safeNumber(val.value); // Recursive unwrap
+    }
+    return 0;
+  };
+
+  const safeString = (val: any): string | null => {
+    if (val === undefined || val === null) return null;
+    if (typeof val === "string") return val;
+    if (typeof val === "object") {
+      if ("value" in val) return safeString(val.value); // Recursive unwrap
+      // Handle potential Principal object structure if different
+      if ("address" in val) return safeString(val.address);
+    }
+    return String(val); // Fallback stringify
+  };
+
   // Get vault state for an address
   const getVaultState = useCallback(async (address: string): Promise<VaultState | null> => {
     const { address: contractAddr, name: contractName } = parseContractId(CURRENT_CONTRACTS.flowvault);
-    
+
     try {
       const result: ClarityValue = await fetchCallReadOnlyFunction({
         contractAddress: contractAddr,
@@ -77,23 +99,35 @@ export function useFlowVault() {
         senderAddress: address,
         network: NETWORK,
       });
-      
+
+      // Use cvToValue to convert Clarity types to JS types
       const value = cvToValue(result, true);
-      console.log("Vault state raw value:", JSON.stringify(value, null, 2));
-      
-      // Extract values from nested Clarity structure
-      const totalBalance = Number(value["total-balance"]?.value || 0);
-      const lockedBalance = Number(value["locked-balance"]?.value || 0);
-      const unlockedBalance = Number(value["unlocked-balance"]?.value || 0);
-      const lockUntilBlock = Number(value["lock-until-block"]?.value || 0);
-      const currentBlock = Number(value["current-block"]?.value || 0);
-      
-      const rules = value["routing-rules"]?.value || {};
-      const lockAmount = Number(rules["lock-amount"]?.value || 0);
-      const lockUntilBlockRules = Number(rules["lock-until-block"]?.value || 0);
-      const splitAddress = rules["split-address"]?.value || null;
-      const splitAmount = Number(rules["split-amount"]?.value || 0);
-      
+      // console.log("Vault state raw value:", JSON.stringify(value, null, 2));
+
+      // Safely extract values handling both direct values and potential CV wrappers
+      // Depending on the version/environment, cvToValue might return nested objects or primitives
+
+      // Handle the case where the tuple itself is wrapped
+      const root = (value && typeof value === 'object' && 'value' in value) ? value.value : value;
+
+      const totalBalance = safeNumber(root["total-balance"]);
+      const lockedBalance = safeNumber(root["locked-balance"]);
+      const unlockedBalance = safeNumber(root["unlocked-balance"]);
+      const lockUntilBlock = safeNumber(root["lock-until-block"]);
+      const currentBlock = safeNumber(root["current-block"]);
+
+      const rulesRaw = root["routing-rules"];
+      const rules = (rulesRaw && typeof rulesRaw === 'object' && 'value' in rulesRaw) ? rulesRaw.value : (rulesRaw || {});
+
+      const lockAmount = safeNumber(rules["lock-amount"]);
+      const lockUntilBlockRules = safeNumber(rules["lock-until-block"]);
+
+      let splitAddress = safeString(rules["split-address"]);
+      // Extra safety: ensure it looks like a principal if possible, or just non-empty string properly
+      if (splitAddress === "null" || splitAddress === "undefined") splitAddress = null;
+
+      const splitAmount = safeNumber(rules["split-amount"]);
+
       return {
         totalBalance,
         lockedBalance,
@@ -103,7 +137,7 @@ export function useFlowVault() {
         routingRules: {
           lockAmount,
           lockUntilBlock: lockUntilBlockRules,
-          splitAddress,
+          splitAddress, // This will be string or null
           splitAmount,
         },
       };
@@ -142,10 +176,10 @@ export function useFlowVault() {
   const setRoutingRules = useCallback(async (params: RoutingRulesParams): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.flowvault);
-      
+
       await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "set-routing-rules",
@@ -158,7 +192,7 @@ export function useFlowVault() {
         network: "testnet",
         postConditionMode: "allow",
       });
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set routing rules");
@@ -172,11 +206,11 @@ export function useFlowVault() {
   const deposit = useCallback(async (amount: number): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { address: vaultAddr, name: vaultName } = parseContractId(CURRENT_CONTRACTS.flowvault);
       const { address: tokenAddr, name: tokenName } = parseContractId(CURRENT_CONTRACTS.usdcx);
-      
+
       await request("stx_callContract", {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "deposit",
@@ -187,7 +221,7 @@ export function useFlowVault() {
         network: "testnet",
         postConditionMode: "allow",
       });
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to deposit");
@@ -201,11 +235,11 @@ export function useFlowVault() {
   const withdraw = useCallback(async (amount: number): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { address: vaultAddr, name: vaultName } = parseContractId(CURRENT_CONTRACTS.flowvault);
       const { address: tokenAddr, name: tokenName } = parseContractId(CURRENT_CONTRACTS.usdcx);
-      
+
       await request("stx_callContract", {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "withdraw",
@@ -216,7 +250,7 @@ export function useFlowVault() {
         network: "testnet",
         postConditionMode: "allow",
       });
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to withdraw");
@@ -230,10 +264,10 @@ export function useFlowVault() {
   const clearRoutingRules = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.flowvault);
-      
+
       await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "clear-routing-rules",
@@ -241,7 +275,7 @@ export function useFlowVault() {
         network: "testnet",
         postConditionMode: "allow",
       });
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to clear routing rules");
@@ -255,10 +289,10 @@ export function useFlowVault() {
   const requestFaucet = useCallback(async (amount: number): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.usdcx);
-      
+
       await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "faucet",
@@ -266,7 +300,7 @@ export function useFlowVault() {
         network: "testnet",
         postConditionMode: "allow",
       });
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to request from faucet");
