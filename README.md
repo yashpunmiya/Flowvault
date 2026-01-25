@@ -10,8 +10,9 @@ A programmable routing vault for USDCx on the Stacks blockchain. FlowVault enabl
 
 - **🔒 Time-Locked Savings**: Lock a portion of your deposits until a specific block height
 - **✂️ Auto-Split Deposits**: Automatically route a portion of deposits to another address
-- **💰 USDCx Support**: Built for the USDCx stablecoin on Stacks
+- **💰 USDCx Support**: Built for the real USDCx stablecoin on Stacks
 - **📊 Vault State Viewer**: Real-time view of your vault balances and routing rules
+- **🌐 Live Demo**: [https://flowvault-delta.vercel.app](https://flowvault-delta.vercel.app)
 
 ## 🏗️ Architecture
 
@@ -20,8 +21,8 @@ flowvault/
 ├── flowvault-contracts/     # Clarity smart contracts
 │   ├── contracts/
 │   │   ├── sip-010-trait.clar   # SIP-010 token standard trait
-│   │   ├── mock-usdcx.clar      # Mock USDCx token for testing
-│   │   └── flowvault.clar       # Main vault contract
+│   │   ├── flowvault.clar       # Main vault contract
+│   │   └── mock-usdcx.clar      # Mock USDCx for local testing only
 │   └── tests/
 │       ├── flowvault.test.ts    # Vault contract tests
 │       └── mock-usdcx.test.ts   # Token tests
@@ -43,6 +44,7 @@ flowvault/
 - [Clarinet](https://github.com/hirosystems/clarinet) v3.13+
 - A Stacks wallet (Leather, Xverse, etc.)
 - Testnet STX tokens (from [Stacks Faucet](https://explorer.hiro.so/sandbox/faucet?chain=testnet))
+- USDCx tokens (real testnet USDCx: `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`)
 
 ### ⚠️ Important: Deployment Required
 
@@ -138,8 +140,8 @@ npm test
 
 | Contract | Address |
 |----------|---------|
-| FlowVault | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.flowvault` |
-| Mock USDCx | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.mock-usdcx` |
+| FlowVault | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault` |
+| USDCx | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` |
 
 ### Mainnet
 
@@ -192,10 +194,12 @@ npm run lint
 
 ## 🤝 Why USDCx?
 
-USDCx is a wrapped USDC token on Stacks that provides:
-- Stablecoin reliability (1:1 USD peg)
+USDCx is a bridged USDC token on Stacks that provides:
+- Stablecoin reliability (1:1 USD peg via bridge)
 - Full SIP-010 compatibility
 - Seamless integration with Stacks DeFi
+
+**Live on Testnet:** FlowVault is deployed and functional on Stacks testnet with real USDCx integration. Try it at [https://flowvault-delta.vercel.app](https://flowvault-delta.vercel.app)
 
 ## 📄 License
 
