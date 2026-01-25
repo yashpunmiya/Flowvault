@@ -1,26 +1,105 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Brand Colors - Stacks & Bitcoin Inspired */
+  --color-primary: #FF5E13;
+  /* Stacks Orange */
+  --color-primary-hover: #FF7B3D;
+  --color-primary-foreground: #FFFFFF;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-secondary: #5546FF;
+  /* Stacks Purple */
+  --color-secondary-hover: #7064FF;
+  --color-secondary-foreground: #FFFFFF;
+
+  /* Neutral Palette - Richer Dark Mode */
+  --color-background: #050505;
+  /* True Black */
+  --color-surface: #121214;
+  /* Slightly lighter for cards */
+  --color-surface-hover: #1C1C1F;
+  --color-foreground: #FFFFFF;
+  --color-muted: #A1A1AA;
+  --color-border: #27272A;
+
+  /* Form Elements */
+  --color-input: #18181B;
+  --color-input-hover: #27272A;
+
+  /* Fonts */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
 
+/* Utilities */
+.glass-panel {
+  @apply bg-[#121214]/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+}
+
+.glass-card {
+  @apply bg-[#0F0F11] border border-white/5 shadow-lg hover:border-white/10 transition-all duration-300;
+}
+
+.glass-card-strong {
+  @apply bg-[#18181B]/60 backdrop-blur-2xl border border-white/10 shadow-xl hover:border-white/20 transition-all duration-300;
+}
+
+.input-field {
+  @apply w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 focus:outline-none transition-all duration-200;
+}
+
+.text-gradient-primary {
+  @apply bg-gradient-to-r from-[#FF5E13] to-[#FF9B6D] bg-clip-text text-transparent;
+}
+
+.text-gradient-secondary {
+  @apply bg-gradient-to-br from-[#5546FF] to-[#9B94FF] bg-clip-text text-transparent;
+}
+
+/* Base Styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(85, 70, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(255, 94, 19, 0.05) 0%, transparent 30%);
+  background-attachment: fixed;
+}
+
+
+
+.btn-secondary {
+  @apply bg-white/5 border border-white/10 text-white px-6 py-3 rounded-xl font-medium hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
+}
+
+.card-gradient-1 {
+  @apply bg-gradient-to-br from-[#1A1A1D] to-[#0F0F11] border border-white/5;
 }

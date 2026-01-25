@@ -12,12 +12,13 @@ export function WalletConnect() {
   if (wallet.isConnected && wallet.stxAddress) {
     return (
       <div className="flex items-center gap-3">
-        <div className="px-4 py-2 bg-gray-800 rounded-lg text-sm font-mono text-green-400">
+        <div className="glass-panel px-4 py-2 rounded-xl text-sm font-mono text-white/90 border-primary/20 bg-primary/5 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#00D67D] animate-pulse" />
           {truncateAddress(wallet.stxAddress)}
         </div>
         <button
           onClick={disconnectWallet}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium"
         >
           Disconnect
         </button>
@@ -29,7 +30,7 @@ export function WalletConnect() {
     <button
       onClick={connectWallet}
       disabled={isLoading}
-      className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="btn-primary"
     >
       {isLoading ? "Connecting..." : "Connect Wallet"}
     </button>

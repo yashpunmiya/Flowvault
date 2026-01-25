@@ -2,16 +2,20 @@
 
 import { WalletConnect } from "@/components/WalletConnect";
 import { VaultDashboard } from "@/components/VaultDashboard";
-import { DeploymentNotice } from "@/components/DeploymentNotice";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div className="min-h-screen relative overflow-hidden bg-background selection:bg-primary/30 text-foreground">
+      {/* Background Gradients - Layer Waves */}
+      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] -z-10" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[120px] -z-10" />
+      <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-[80px] -z-10" />
+
       {/* Header */}
-      <header className="border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+      <header className="sticky top-0 z-50 glass-panel border-b-0 border-white/5 bg-background/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4 group cursor-pointer">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
@@ -21,77 +25,73 @@ export default function Home() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  strokeWidth={2.5}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 />
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">FlowVault</h1>
-              <p className="text-xs text-gray-500">Programmable Routing Vault</p>
+              <h1 className="text-xl font-bold text-white tracking-tight">FlowVault</h1>
+              <div className="flex items-center gap-2">
+                 <span className="w-1.5 h-1.5 rounded-full bg-[#00D67D]"></span>
+                 <p className="text-xs text-white/50 font-medium">Stacks Mainnet</p>
+              </div>
             </div>
           </div>
           <WalletConnect />
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Programmable{" "}
-            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+      {/* Hero Section - Reduced Padding as requested */}
+      <section className="pt-16 pb-12 px-6 relative">
+        <div className="max-w-4xl mx-auto text-center space-y-6 animate-[fade-in_0.8s_ease-out]">
+          <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-[1.1]">
+            Programmable <br/>
+            <span className="text-gradient-primary">
               USDCx Routing
             </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Lock, split, and automate your stablecoin flows on Stacks. 
-            Set custom routing rules and let FlowVault handle the rest.
+          <p className="text-lg text-white/60 max-w-2xl mx-auto font-light leading-relaxed">
+            Secure, non-custodial vault management on Stacks. Automate your flows with on-chain rules.
           </p>
           
-          {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-3 mt-8">
-            <span className="px-4 py-2 bg-purple-900/30 border border-purple-700/50 rounded-full text-purple-300 text-sm">
-              🔒 Time-Locked Savings
-            </span>
-            <span className="px-4 py-2 bg-blue-900/30 border border-blue-700/50 rounded-full text-blue-300 text-sm">
-              ✂️ Auto-Split Deposits
-            </span>
-            <span className="px-4 py-2 bg-green-900/30 border border-green-700/50 rounded-full text-green-300 text-sm">
-              💰 USDCx Stablecoin
-            </span>
+          {/* Feature Pills - Glass Style */}
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
+              <span className="text-primary">🔒</span>
+              <span className="text-sm font-medium">Time-Locked</span>
+            </div>
+            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
+              <span className="text-purple-400">✂️</span>
+              <span className="text-sm font-medium">Auto-Split</span>
+            </div>
+            <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
+              <span className="text-blue-400">⚡</span>
+              <span className="text-sm font-medium">Bitcoin Finality</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Dashboard */}
-      <main className="max-w-6xl mx-auto px-6 pb-20">
-        <DeploymentNotice />
+      <main className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <VaultDashboard />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm">
-          <p>
+      <footer className="border-t border-white/5 py-12 bg-black/20 mt-12">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-white/40 text-sm">
             Built on{" "}
             <a
               href="https://stacks.co"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-400 hover:text-purple-300"
+              className="text-primary hover:text-primary-hover font-medium transition-colors"
             >
               Stacks
             </a>{" "}
-            · Using{" "}
-            <a
-              href="https://docs.stacks.co"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300"
-            >
-              Clarity Smart Contracts
-            </a>
+            &middot; Secured by Bitcoin
           </p>
         </div>
       </footer>
