@@ -2,7 +2,16 @@
 
 import { useCallback, useState } from "react";
 import { request } from "@stacks/connect";
-import { Cl, cvToValue, fetchCallReadOnlyFunction, ClarityValue } from "@stacks/transactions";
+import {
+  cvToValue,
+  fetchCallReadOnlyFunction,
+  ClarityValue,
+  uintCV,
+  principalCV,
+  contractPrincipalCV,
+  someCV,
+  noneCV,
+} from "@stacks/transactions";
 import { NETWORK, CURRENT_CONTRACTS, parseContractId } from "@/lib/contracts";
 
 export interface VaultState {
@@ -32,9 +41,9 @@ export function useFlowVault() {
   const [readError, setReadError] = useState<string | null>(null);
 
   const toUint = (value: number) => {
-    if (!Number.isFinite(value)) return Cl.uint(0);
+    if (!Number.isFinite(value)) return uintCV(0);
     const safe = Math.max(0, Math.trunc(value));
-    return Cl.uint(BigInt(safe));
+    return uintCV(BigInt(safe));
   };
 
   // Get USDCx balance for an address
@@ -46,7 +55,7 @@ export function useFlowVault() {
         contractAddress: contractAddr,
         contractName: contractName,
         functionName: "get-balance",
-        functionArgs: [Cl.principal(address)],
+        functionArgs: [principalCV(address)],
         senderAddress: address,
         network: NETWORK,
       });
@@ -95,7 +104,7 @@ export function useFlowVault() {
         contractAddress: contractAddr,
         contractName: contractName,
         functionName: "get-vault-state",
-        functionArgs: [Cl.principal(address)],
+        functionArgs: [principalCV(address)],
         senderAddress: address,
         network: NETWORK,
       });
@@ -186,7 +195,7 @@ export function useFlowVault() {
         functionArgs: [
           toUint(params.lockAmount),
           toUint(params.lockUntilBlock),
-          params.splitAddress ? Cl.some(Cl.principal(params.splitAddress)) : Cl.none(),
+          params.splitAddress ? someCV(principalCV(params.splitAddress)) : noneCV(),
           toUint(params.splitAmount),
         ],
         network: "testnet",
@@ -215,7 +224,7 @@ export function useFlowVault() {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "deposit",
         functionArgs: [
-          Cl.contractPrincipal(tokenAddr, tokenName),
+          contractPrincipalCV(tokenAddr, tokenName),
           toUint(amount),
         ],
         network: "testnet",
@@ -244,7 +253,7 @@ export function useFlowVault() {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "withdraw",
         functionArgs: [
-          Cl.contractPrincipal(tokenAddr, tokenName),
+          contractPrincipalCV(tokenAddr, tokenName),
           toUint(amount),
         ],
         network: "testnet",

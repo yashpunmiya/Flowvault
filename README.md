@@ -12,7 +12,7 @@ A programmable routing vault for USDCx on the Stacks blockchain. FlowVault enabl
 - **✂️ Auto-Split Deposits**: Automatically route a portion of deposits to another address
 - **💰 USDCx Support**: Built for the real USDCx stablecoin on Stacks
 - **📊 Vault State Viewer**: Real-time view of your vault balances and routing rules
-- **🌐 Live Demo**: [https://flowvault-delta.vercel.app](https://flowvault-delta.vercel.app)
+- **🌐 Live Demo**: [https://flowvault-beta.vercel.app](https://flowvault-delta.vercel.app)
 
 ## 🏗️ Architecture
 
