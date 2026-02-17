@@ -34,6 +34,9 @@
 (define-constant ERR-NO-VAULT-CONFIG (err u1006))
 (define-constant ERR-INVALID-SPLIT-ADDRESS (err u1007))
 (define-constant ERR-INVALID-LOCK-BLOCK (err u1008))
+(define-constant ERR-ARITHMETIC-OVERFLOW (err u1009))
+(define-constant ERR-LOCK-EXCEEDS-HOLD (err u1010))
+(define-constant ERR-SPLIT-TO-SELF (err u1011))
 
 ;; ========================
 ;; Data Maps
@@ -136,6 +139,14 @@
       (or (is-eq split-amount u0) (is-some split-address))
       ERR-INVALID-SPLIT-ADDRESS
     )
+    ;; Validate: split address cannot be the caller (split-to-self)
+    (asserts!
+      (match split-address
+        addr (not (is-eq addr tx-sender))
+        true
+      )
+      ERR-SPLIT-TO-SELF
+    )
     ;; Validate: if lock amount > 0, lock-until-block must be in the future
     (asserts!
       (or (is-eq lock-amount u0) (> lock-until-block stacks-block-height))
@@ -184,13 +195,17 @@
       (split-amt (get split-amount rules))
       (split-addr (get split-address rules))
       (lock-block (get lock-until-block rules))
-      (total-routed (+ lock-amt split-amt))
+      (current-lock-block (get lock-until-block current-balance-data))
+      (current-locked-bal (get locked-balance current-balance-data))
+      (is-current-lock-active (> current-lock-block stacks-block-height))
     )
     ;; Validate amount > 0
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
     
-    ;; Validate routing rules don't exceed deposit amount
-    (asserts! (<= total-routed amount) ERR-ROUTING-EXCEEDS-DEPOSIT)
+    ;; Validate routing rules don't exceed deposit amount (overflow check)
+    (asserts! (and (<= lock-amt amount) (<= split-amt amount)) ERR-ROUTING-EXCEEDS-DEPOSIT)
+    (let ((total-routed (+ lock-amt split-amt)))
+      (asserts! (<= total-routed amount) ERR-ROUTING-EXCEEDS-DEPOSIT)
     
     ;; Transfer USDCx from depositor to this contract
     (try! (contract-call? token transfer amount depositor (get-contract-principal) none))
@@ -209,37 +224,57 @@
     (let
       (
         (hold-amount (- amount split-amt))
-        (new-total (+ (get total-balance current-balance-data) hold-amount))
-        (new-locked (if (> lock-amt u0) 
-          (+ (get locked-balance current-balance-data) lock-amt)
-          (get locked-balance current-balance-data)
-        ))
-        (new-lock-block (if (> lock-amt u0)
-          lock-block
-          (get lock-until-block current-balance-data)
-        ))
+        ;; Clear expired locks before processing new deposit
+        (effective-current-locked (if is-current-lock-active current-locked-bal u0))
+        (effective-current-lock-block (if is-current-lock-active current-lock-block u0))
       )
-      ;; Update vault balances
-      (map-set vault-balances depositor {
-        total-balance: new-total,
-        locked-balance: new-locked,
-        lock-until-block: new-lock-block
-      })
-      
-      ;; Emit deposit event
-      (print {
-        event: "deposit",
-        depositor: depositor,
-        amount: amount,
-        split-amount: split-amt,
-        split-to: split-addr,
-        lock-amount: lock-amt,
-        lock-until: lock-block,
-        hold-amount: hold-amount
-      })
-      
-      (ok { deposited: amount, held: hold-amount, split: split-amt, locked: lock-amt })
-    )
+      ;; Validate lock amount doesn't exceed hold amount
+      (asserts! (<= lock-amt hold-amount) ERR-LOCK-EXCEEDS-HOLD)
+      ;; Prevent lock block reduction if there are active locked funds
+      (asserts!
+        (or
+          (is-eq lock-amt u0)
+          (not is-current-lock-active)
+          (>= lock-block current-lock-block)
+        )
+        ERR-INVALID-LOCK-BLOCK
+      )
+      (let
+        (
+          (new-total (+ (get total-balance current-balance-data) hold-amount))
+          (new-locked (if (> lock-amt u0) 
+            (+ effective-current-locked lock-amt)
+            effective-current-locked
+          ))
+          (new-lock-block (if (> lock-amt u0)
+            lock-block
+            effective-current-lock-block
+          ))
+        )
+        ;; Overflow check for new-total
+        (asserts! (>= new-total (get total-balance current-balance-data)) ERR-ARITHMETIC-OVERFLOW)
+        ;; Update vault balances
+        (map-set vault-balances depositor {
+          total-balance: new-total,
+          locked-balance: new-locked,
+          lock-until-block: new-lock-block
+        })
+        
+        ;; Emit deposit event
+        (print {
+          event: "deposit",
+          depositor: depositor,
+          amount: amount,
+          split-amount: split-amt,
+          split-to: split-addr,
+          lock-amount: lock-amt,
+          lock-until: lock-block,
+          hold-amount: hold-amount
+        })
+        
+        (ok { deposited: amount, held: hold-amount, split: split-amt, locked: lock-amt })
+      )
+    )))
   )
 )
 
