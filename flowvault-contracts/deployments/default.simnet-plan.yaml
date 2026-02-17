@@ -66,16 +66,16 @@ plan:
         - emulated-contract-publish:
             contract-name: sip-010-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\sip-010-trait.clar"
+            path: contracts/sip-010-trait.clar
             clarity-version: 3
         - emulated-contract-publish:
             contract-name: flowvault
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\flowvault.clar"
+            path: contracts/flowvault.clar
             clarity-version: 3
         - emulated-contract-publish:
             contract-name: mock-usdcx
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: "contracts\\mock-usdcx.clar"
+            path: contracts/mock-usdcx.clar
             clarity-version: 3
       epoch: "3.3"
