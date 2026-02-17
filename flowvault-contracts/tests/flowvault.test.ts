@@ -338,4 +338,145 @@ describe("FlowVault Contract Tests", () => {
       expect(rulesResult.result).toBeNone();
     });
   });
+
+  describe("Security: Vulnerability Protections", () => {
+    it("prevents split-to-self", () => {
+      const futureBlock = simnet.blockHeight + 100;
+      // Try to set split address to self
+      const { result } = setRoutingRules(wallet1, 0, futureBlock, wallet1, 100000);
+      expect(result).toBeErr(Cl.uint(1011)); // ERR-SPLIT-TO-SELF
+    });
+
+    it("prevents lock amount exceeding hold amount", () => {
+      mintTokens(wallet1, 1000000);
+      
+      const futureBlock = simnet.blockHeight + 100;
+      // Set lock=600k, split=500k, but depositing only 1M
+      // Hold would be 500k, but lock is 600k - should fail
+      setRoutingRules(wallet1, 600000, futureBlock, wallet2, 500000);
+      
+      const { result } = deposit(wallet1, 1000000);
+      expect(result).toBeErr(Cl.uint(1010)); // ERR-LOCK-EXCEEDS-HOLD
+    });
+
+    it("prevents reducing lock block on subsequent deposits", () => {
+      mintTokens(wallet1, 2000000);
+      
+      const futureBlock1 = simnet.blockHeight + 100;
+      const futureBlock2 = simnet.blockHeight + 50;
+      
+      // First deposit with lock until block 100
+      setRoutingRules(wallet1, 500000, futureBlock1, null, 0);
+      const deposit1 = deposit(wallet1, 1000000);
+      expect(deposit1.result).toBeOk(
+        Cl.tuple({
+          deposited: Cl.uint(1000000),
+          held: Cl.uint(1000000),
+          split: Cl.uint(0),
+          locked: Cl.uint(500000),
+        })
+      );
+      
+      // Try second deposit with lock until block 50 (earlier) - should fail
+      setRoutingRules(wallet1, 300000, futureBlock2, null, 0);
+      const deposit2 = deposit(wallet1, 1000000);
+      expect(deposit2.result).toBeErr(Cl.uint(1008)); // ERR-INVALID-LOCK-BLOCK
+    });
+
+    it("allows extending lock block on subsequent deposits", () => {
+      mintTokens(wallet1, 2000000);
+      
+      const futureBlock1 = simnet.blockHeight + 50;
+      const futureBlock2 = simnet.blockHeight + 100;
+      
+      // First deposit with lock until block 50
+      setRoutingRules(wallet1, 500000, futureBlock1, null, 0);
+      const deposit1 = deposit(wallet1, 1000000);
+      expect(deposit1.result).toBeOk(
+        Cl.tuple({
+          deposited: Cl.uint(1000000),
+          held: Cl.uint(1000000),
+          split: Cl.uint(0),
+          locked: Cl.uint(500000),
+        })
+      );
+      
+      // Second deposit with lock until block 100 (later) - should succeed
+      setRoutingRules(wallet1, 300000, futureBlock2, null, 0);
+      const deposit2 = deposit(wallet1, 1000000);
+      expect(deposit2.result).toBeOk(
+        Cl.tuple({
+          deposited: Cl.uint(1000000),
+          held: Cl.uint(1000000),
+          split: Cl.uint(0),
+          locked: Cl.uint(300000),
+        })
+      );
+      
+      // Verify total locked is accumulated and lock block is extended
+      const state = getVaultState(wallet1);
+      expect(state.result).toBeTuple({
+        "total-balance": Cl.uint(2000000),
+        "locked-balance": Cl.uint(800000), // 500k + 300k
+        "unlocked-balance": Cl.uint(1200000),
+        "lock-until-block": Cl.uint(futureBlock2),
+        "current-block": Cl.uint(simnet.blockHeight),
+        "routing-rules": Cl.tuple({
+          "lock-amount": Cl.uint(300000),
+          "lock-until-block": Cl.uint(futureBlock2),
+          "split-address": Cl.none(),
+          "split-amount": Cl.uint(0),
+        }),
+      });
+    });
+
+    it("clears expired locks on new deposit", () => {
+      mintTokens(wallet1, 2000000);
+      
+      const shortLockBlock = simnet.blockHeight + 5;
+      
+      // First deposit with short lock
+      setRoutingRules(wallet1, 500000, shortLockBlock, null, 0);
+      const deposit1 = deposit(wallet1, 1000000);
+      expect(deposit1.result).toBeOk(
+        Cl.tuple({
+          deposited: Cl.uint(1000000),
+          held: Cl.uint(1000000),
+          split: Cl.uint(0),
+          locked: Cl.uint(500000),
+        })
+      );
+      
+      // Mine blocks to expire the lock
+      simnet.mineEmptyBlocks(10);
+      
+      // Deposit without lock rules
+      setRoutingRules(wallet1, 0, 0, null, 0);
+      const deposit2 = deposit(wallet1, 500000);
+      expect(deposit2.result).toBeOk(
+        Cl.tuple({
+          deposited: Cl.uint(500000),
+          held: Cl.uint(500000),
+          split: Cl.uint(0),
+          locked: Cl.uint(0),
+        })
+      );
+      
+      // Verify expired lock was cleared
+      const state = getVaultState(wallet1);
+      expect(state.result).toBeTuple({
+        "total-balance": Cl.uint(1500000),
+        "locked-balance": Cl.uint(0), // Expired lock cleared
+        "unlocked-balance": Cl.uint(1500000),
+        "lock-until-block": Cl.uint(0),
+        "current-block": Cl.uint(simnet.blockHeight),
+        "routing-rules": Cl.tuple({
+          "lock-amount": Cl.uint(0),
+          "lock-until-block": Cl.uint(0),
+          "split-address": Cl.none(),
+          "split-amount": Cl.uint(0),
+        }),
+      });
+    });
+  });
 });
