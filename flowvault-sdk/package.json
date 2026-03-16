@@ -1,0 +1,38 @@
+{
+  "name": "flowvault-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for FlowVault — Programmable USDCx Routing on Stacks",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
+  },
+  "keywords": [
+    "stacks",
+    "usdcx",
+    "flowvault",
+    "routing",
+    "vault",
+    "defi",
+    "clarity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@stacks/network": "^7.3.1",
+    "@stacks/transactions": "^7.3.1"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
