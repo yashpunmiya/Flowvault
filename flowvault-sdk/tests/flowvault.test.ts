@@ -13,6 +13,7 @@ import {
   someCV,
   principalCV,
   trueCV,
+  PostConditionMode,
 } from "@stacks/transactions";
 
 // We must mock @stacks/transactions before importing FlowVault
@@ -144,6 +145,9 @@ describe("FlowVault state-changing methods (mocked)", () => {
     (broadcastTransaction as ReturnType<typeof vi.fn>).mockResolvedValue({
       txid: "0xabc123",
     });
+    (fetchCallReadOnlyFunction as ReturnType<typeof vi.fn>).mockResolvedValue(
+      uintCV(190000)
+    );
   });
 
   it("deposit should broadcast and return txId", async () => {
@@ -180,6 +184,21 @@ describe("FlowVault state-changing methods (mocked)", () => {
     const callArgs = (makeContractCall as ReturnType<typeof vi.fn>).mock
       .calls[0][0];
     expect(callArgs.functionName).toBe("set-routing-rules");
+  });
+
+  it("deposit should pass post-conditions when provided", async () => {
+    const vault = makeVault();
+    const postConditions = [{} as any];
+
+    await vault.deposit(1000000, {
+      postConditions,
+      postConditionMode: "deny",
+    });
+
+    const callArgs = (makeContractCall as ReturnType<typeof vi.fn>).mock
+      .calls[0][0];
+    expect(callArgs.postConditions).toBe(postConditions);
+    expect(callArgs.postConditionMode).toBe(PostConditionMode.Deny);
   });
 
   it("clearRoutingRules should broadcast", async () => {

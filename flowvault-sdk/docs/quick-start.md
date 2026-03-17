@@ -34,10 +34,10 @@ Configure how future deposits are routed:
 import { tokenToMicro } from "flowvault-sdk";
 
 const tx = await vault.setRoutingRules({
-  lockAmount: tokenToMicro(100),   // Lock 100 USDCx
+  lockAmount: tokenToMicro("100"), // Lock 100 USDCx
   lockUntilBlock: 210000,          // Until block 210,000
   splitAddress: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG",
-  splitAmount: tokenToMicro(50),   // Send 50 USDCx to the split address
+  splitAmount: tokenToMicro("50"), // Send 50 USDCx to the split address
 });
 
 console.log("Set rules tx:", tx.txId);
@@ -46,7 +46,7 @@ console.log("Set rules tx:", tx.txId);
 ## 4. Deposit USDCx
 
 ```ts
-const depositTx = await vault.deposit(tokenToMicro(500));
+const depositTx = await vault.deposit(tokenToMicro("500"));
 console.log("Deposit tx:", depositTx.txId);
 // Routing executes: 100 locked, 50 split, 350 held
 ```
@@ -68,7 +68,7 @@ console.log("Current block:", state.currentBlock);
 ## 6. Withdraw Unlocked Funds
 
 ```ts
-const withdrawTx = await vault.withdraw(tokenToMicro(200));
+const withdrawTx = await vault.withdraw(tokenToMicro("200"));
 console.log("Withdraw tx:", withdrawTx.txId);
 ```
 

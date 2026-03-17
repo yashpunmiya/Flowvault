@@ -41,6 +41,9 @@ export const USDCX_DECIMALS = 6;
 /** Multiplier to convert whole tokens → micro-units. */
 export const USDCX_MULTIPLIER = 10 ** USDCX_DECIMALS; // 1_000_000
 
+/** BigInt multiplier to convert whole tokens to micro-units. */
+export const USDCX_MULTIPLIER_BIGINT = BigInt(USDCX_MULTIPLIER);
+
 // ---------------------------------------------------------------------------
 // Contract error code → human-readable message
 // ---------------------------------------------------------------------------

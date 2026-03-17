@@ -5,6 +5,7 @@ import { describe, it, expect } from "vitest";
 import { parseVaultState, parseRoutingRules } from "../src/utils";
 import { tupleCV, uintCV, noneCV, someCV, principalCV } from "@stacks/transactions";
 import type { ClarityValue } from "@stacks/transactions";
+import { ParsingError } from "../src/errors";
 
 // ---------------------------------------------------------------------------
 // parseVaultState
@@ -66,6 +67,14 @@ describe("parseVaultState", () => {
     expect(state.routingRules.splitAddress).toBeNull();
     expect(state.routingRules.splitAmount).toBe(0);
   });
+
+  it("should throw on malformed vault state", () => {
+    const cv: ClarityValue = tupleCV({
+      "total-balance": uintCV(1),
+    });
+
+    expect(() => parseVaultState(cv)).toThrow(ParsingError);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -110,5 +119,13 @@ describe("parseRoutingRules", () => {
     expect(rules).not.toBeNull();
     expect(rules!.splitAddress).toBeNull();
     expect(rules!.splitAmount).toBe(0);
+  });
+
+  it("should throw on malformed rules", () => {
+    const cv: ClarityValue = tupleCV({
+      "lock-amount": uintCV(1000),
+    });
+
+    expect(() => parseRoutingRules(cv)).toThrow(ParsingError);
   });
 });

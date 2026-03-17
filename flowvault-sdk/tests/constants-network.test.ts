@@ -4,7 +4,7 @@
 import { describe, it, expect } from "vitest";
 import { DEFAULT_CONTRACTS, errorMessageFromCode, USDCX_DECIMALS, USDCX_MULTIPLIER } from "../src/constants";
 import { resolveNetwork, getRpcEndpoint } from "../src/network";
-import { InvalidConfigurationError } from "../src/errors";
+import { NetworkConfigurationError } from "../src/errors";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -52,8 +52,8 @@ describe("resolveNetwork", () => {
   });
 
   it("should reject unknown networks", () => {
-    expect(() => resolveNetwork("devnet")).toThrow(InvalidConfigurationError);
-    expect(() => resolveNetwork("")).toThrow(InvalidConfigurationError);
+    expect(() => resolveNetwork("devnet")).toThrow(NetworkConfigurationError);
+    expect(() => resolveNetwork("")).toThrow(NetworkConfigurationError);
   });
 });
 

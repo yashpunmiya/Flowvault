@@ -5,7 +5,7 @@
  */
 
 import type { NetworkName } from "./types";
-import { InvalidConfigurationError } from "./errors";
+import { NetworkConfigurationError } from "./errors";
 
 // ---------------------------------------------------------------------------
 // RPC endpoints
@@ -31,7 +31,7 @@ export function resolveNetwork(network: string): NetworkName {
   if (network === "testnet" || network === "mainnet") {
     return network;
   }
-  throw new InvalidConfigurationError(
+  throw new NetworkConfigurationError(
     `Unsupported network "${network}". Use "testnet" or "mainnet".`
   );
 }

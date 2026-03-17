@@ -1,0 +1,117 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6fb;
+  color: #111827;
+}
+
+.container {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.subtitle {
+  margin-top: 0;
+  color: #4b5563;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+.inline-form {
+  display: flex;
+  gap: 10px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+button {
+  background: #0f62fe;
+  color: white;
+  border-color: #0f62fe;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+}
+
+.state {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.state p {
+  margin: 0;
+}
+
+.ok {
+  color: #065f46;
+  font-weight: 600;
+}
+
+.error {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.note {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}

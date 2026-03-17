@@ -16,21 +16,24 @@ import {
   noneCV,
   type ClarityValue,
   getAddressFromPrivateKey,
-  type PostConditionMode,
+  PostConditionMode,
+  type PostCondition,
 } from "@stacks/transactions";
 
 import type {
   FlowVaultConfig,
   NetworkName,
+  MicroAmount,
   RoutingRules,
   TransactionResult,
+  TransactionOptions,
   VaultState,
+  PostConditionModeLike,
 } from "./types";
 
 import {
   InvalidConfigurationError,
-  InvalidAmountError,
-  InvalidAddressError,
+  InvalidRoutingRuleError,
   ContractCallError,
   NetworkError,
 } from "./errors";
@@ -39,22 +42,35 @@ import { errorMessageFromCode } from "./constants";
 import { resolveNetwork } from "./network";
 import {
   assertValidAddress,
-  assertValidAmount,
-  assertNonNegativeAmount,
+  assertValidContractName,
+  parseMicroAmount,
   parseVaultState,
   parseRoutingRules,
   safeNumber,
   isBlockInFuture,
+  parseBool,
 } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Convert a JS number to a Clarity `uint` value. */
-function toUintCV(value: number) {
-  const safe = Math.max(0, Math.trunc(value));
-  return uintCV(BigInt(safe));
+/** Convert a micro-unit amount into a Clarity `uint`. */
+function toUintCVFromMicro(
+  amount: MicroAmount,
+  label: string,
+  allowZero: boolean
+): ClarityValue {
+  const value = parseMicroAmount(amount, label, allowZero);
+  return uintCV(value);
+}
+
+/** Convert a block height into a Clarity `uint`. */
+function toUintCVFromBlock(height: number, label: string): ClarityValue {
+  if (!Number.isFinite(height) || !Number.isInteger(height) || height < 0) {
+    throw new InvalidRoutingRuleError(`${label} must be a non-negative integer.`);
+  }
+  return uintCV(BigInt(height));
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +86,8 @@ export class FlowVault {
   private readonly tokenContractAddress: string;
   private readonly tokenContractName: string;
   private readonly senderKey?: string;
+  private readonly postConditions?: PostCondition[];
+  private readonly postConditionMode?: PostConditionModeLike;
 
   // -------------------------------------------------------------------------
   // Constructor
@@ -96,12 +114,19 @@ export class FlowVault {
       throw new InvalidConfigurationError("tokenContractName is required.");
     }
 
+    assertValidAddress(config.contractAddress);
+    assertValidAddress(config.tokenContractAddress);
+    assertValidContractName(config.contractName, "contractName");
+    assertValidContractName(config.tokenContractName, "tokenContractName");
+
     this.network = resolveNetwork(config.network);
     this.contractAddress = config.contractAddress;
     this.contractName = config.contractName;
     this.tokenContractAddress = config.tokenContractAddress;
     this.tokenContractName = config.tokenContractName;
     this.senderKey = config.senderKey;
+    this.postConditions = config.postConditions;
+    this.postConditionMode = config.postConditionMode;
   }
 
   // -------------------------------------------------------------------------
@@ -127,12 +152,38 @@ export class FlowVault {
     return getAddressFromPrivateKey(key, this.network);
   }
 
+  /** Resolve a post-condition mode input to the enum value. */
+  private resolvePostConditionMode(
+    mode?: PostConditionModeLike
+  ): PostConditionMode {
+    if (!mode) return PostConditionMode.Allow;
+    if (mode === "allow") return PostConditionMode.Allow;
+    if (mode === "deny") return PostConditionMode.Deny;
+    return mode;
+  }
+
+  /** Resolve post-conditions and mode for a state-changing call. */
+  private resolvePostConditions(options?: TransactionOptions): {
+    postConditions?: PostCondition[];
+    postConditionMode: PostConditionMode;
+  } {
+    return {
+      postConditions: options?.postConditions ?? this.postConditions,
+      postConditionMode: this.resolvePostConditionMode(
+        options?.postConditionMode ?? this.postConditionMode
+      ),
+    };
+  }
+
   /** Build and broadcast a contract-call transaction. */
   private async callPublic(
     functionName: string,
-    functionArgs: ClarityValue[]
+    functionArgs: ClarityValue[],
+    options?: TransactionOptions
   ): Promise<TransactionResult> {
     const senderKey = this.requireSenderKey();
+    const { postConditions, postConditionMode } =
+      this.resolvePostConditions(options);
 
     try {
       const transaction = await makeContractCall({
@@ -142,7 +193,8 @@ export class FlowVault {
         functionArgs,
         senderKey,
         network: this.network,
-        postConditionMode: "allow" as unknown as PostConditionMode,
+        postConditions,
+        postConditionMode,
       });
 
       const result = await broadcastTransaction({
@@ -214,22 +266,32 @@ export class FlowVault {
    * Rules are stored on-chain and executed deterministically on the next
    * deposit.
    *
-   * @param rules Routing rule parameters (amounts in micro-units).
+  * @param rules Routing rule parameters (amounts in micro-units).
+  * @param options Optional transaction options (post-conditions).
    * @returns The broadcast transaction result.
    *
    * @throws {InvalidAmountError} if amounts are invalid.
    * @throws {InvalidAddressError} if `splitAddress` is not a valid principal.
    * @throws {ContractCallError} on on-chain rejection.
    */
-  async setRoutingRules(rules: RoutingRules): Promise<TransactionResult> {
+  async setRoutingRules(
+    rules: RoutingRules,
+    options?: TransactionOptions
+  ): Promise<TransactionResult> {
     // --- Validation ---
-    assertNonNegativeAmount(rules.lockAmount, "lockAmount");
-    assertNonNegativeAmount(rules.lockUntilBlock, "lockUntilBlock");
-    assertNonNegativeAmount(rules.splitAmount, "splitAmount");
+    const lockAmount = parseMicroAmount(rules.lockAmount, "lockAmount", true);
+    const splitAmount = parseMicroAmount(rules.splitAmount, "splitAmount", true);
 
-    if (rules.splitAmount > 0 && !rules.splitAddress) {
-      throw new InvalidAddressError(
-        "",
+    if (!Number.isFinite(rules.lockUntilBlock) ||
+      !Number.isInteger(rules.lockUntilBlock) ||
+      rules.lockUntilBlock < 0) {
+      throw new InvalidRoutingRuleError(
+        "lockUntilBlock must be a non-negative integer."
+      );
+    }
+
+    if (splitAmount > 0n && !rules.splitAddress) {
+      throw new InvalidRoutingRuleError(
         "splitAddress is required when splitAmount > 0."
       );
     }
@@ -240,24 +302,34 @@ export class FlowVault {
       // Prevent split-to-self
       const sender = this.getSenderAddress();
       if (rules.splitAddress === sender) {
-        throw new InvalidAddressError(
-          rules.splitAddress,
+        throw new InvalidRoutingRuleError(
           "splitAddress cannot be the same as the sender (split-to-self)."
+        );
+      }
+    }
+
+    if (lockAmount > 0n) {
+      const currentBlock = await this.getCurrentBlockHeight(
+        this.getSenderAddress()
+      );
+      if (!isBlockInFuture(rules.lockUntilBlock, currentBlock)) {
+        throw new InvalidRoutingRuleError(
+          "lockUntilBlock must be in the future relative to current block."
         );
       }
     }
 
     // --- Build args ---
     const functionArgs: ClarityValue[] = [
-      toUintCV(rules.lockAmount),
-      toUintCV(rules.lockUntilBlock),
+      uintCV(lockAmount),
+      toUintCVFromBlock(rules.lockUntilBlock, "lockUntilBlock"),
       rules.splitAddress
         ? someCV(principalCV(rules.splitAddress))
         : noneCV(),
-      toUintCV(rules.splitAmount),
+      uintCV(splitAmount),
     ];
 
-    return this.callPublic("set-routing-rules", functionArgs);
+    return this.callPublic("set-routing-rules", functionArgs, options);
   }
 
   /**
@@ -266,21 +338,23 @@ export class FlowVault {
    * Routing rules (lock / split / hold) are applied automatically at
    * deposit time.
    *
-   * @param amount Amount to deposit in micro-units.
+  * @param amount Amount to deposit in micro-units.
+  * @param options Optional transaction options (post-conditions).
    * @returns The broadcast transaction result.
    *
    * @throws {InvalidAmountError} if amount is not a positive integer.
    * @throws {ContractCallError} on on-chain rejection.
    */
-  async deposit(amount: number): Promise<TransactionResult> {
-    assertValidAmount(amount, "Deposit amount");
-
+  async deposit(
+    amount: MicroAmount,
+    options?: TransactionOptions
+  ): Promise<TransactionResult> {
     const functionArgs: ClarityValue[] = [
       contractPrincipalCV(this.tokenContractAddress, this.tokenContractName),
-      toUintCV(amount),
+      toUintCVFromMicro(amount, "Deposit amount", false),
     ];
 
-    return this.callPublic("deposit", functionArgs);
+    return this.callPublic("deposit", functionArgs, options);
   }
 
   /**
@@ -289,21 +363,23 @@ export class FlowVault {
    * Only the unlocked portion of the balance can be withdrawn. Locked funds
    * remain inaccessible until the lock block height is reached.
    *
-   * @param amount Amount to withdraw in micro-units.
-   * @returns The broadcast transaction result.
+  * @param amount Amount to withdraw in micro-units.
+  * @param options Optional transaction options (post-conditions).
+  * @returns The broadcast transaction result.
    *
    * @throws {InvalidAmountError} if amount is not a positive integer.
    * @throws {ContractCallError} on on-chain rejection (e.g. funds locked).
    */
-  async withdraw(amount: number): Promise<TransactionResult> {
-    assertValidAmount(amount, "Withdraw amount");
-
+  async withdraw(
+    amount: MicroAmount,
+    options?: TransactionOptions
+  ): Promise<TransactionResult> {
     const functionArgs: ClarityValue[] = [
       contractPrincipalCV(this.tokenContractAddress, this.tokenContractName),
-      toUintCV(amount),
+      toUintCVFromMicro(amount, "Withdraw amount", false),
     ];
 
-    return this.callPublic("withdraw", functionArgs);
+    return this.callPublic("withdraw", functionArgs, options);
   }
 
   /**
@@ -314,8 +390,10 @@ export class FlowVault {
    *
    * @returns The broadcast transaction result.
    */
-  async clearRoutingRules(): Promise<TransactionResult> {
-    return this.callPublic("clear-routing-rules", []);
+  async clearRoutingRules(
+    options?: TransactionOptions
+  ): Promise<TransactionResult> {
+    return this.callPublic("clear-routing-rules", [], options);
   }
 
   // -------------------------------------------------------------------------
@@ -375,7 +453,7 @@ export class FlowVault {
       userAddress
     );
 
-    return !!cvToValue(cv);
+    return parseBool(cv, "has-locked-funds");
   }
 
   /**

@@ -26,7 +26,8 @@ constructor.
 ### What unit are amounts in?
 
 All amounts in the SDK are in **micro-units** (1 USDCx = 1,000,000 micro).
-Use the `tokenToMicro()` and `microToToken()` helpers to convert.
+Use the `tokenToMicro()` and `microToToken()` helpers to convert. Prefer
+string inputs like `tokenToMicro("1.5")` to avoid float precision issues.
 
 ### Why micro-units instead of whole tokens?
 
@@ -90,8 +91,9 @@ recommend loading keys from environment variables.
 
 ### Are there post-conditions?
 
-The current SDK uses `postConditionMode: "allow"` by default. For
-production, consider adding explicit post-conditions to protect user assets.
+The SDK defaults to `postConditionMode: "allow"` for backward compatibility,
+but you can supply post-conditions globally (config) or per call to protect
+user assets.
 
 ---
 

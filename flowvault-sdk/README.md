@@ -70,14 +70,14 @@ const vault = new FlowVault({
 
 // 2. Set routing rules
 await vault.setRoutingRules({
-  lockAmount: tokenToMicro(100),   // lock 100 USDCx
+  lockAmount: tokenToMicro("100"), // lock 100 USDCx
   lockUntilBlock: 210000,          // until block 210 000
   splitAddress: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG",
-  splitAmount: tokenToMicro(50),   // send 50 USDCx to split address
+  splitAmount: tokenToMicro("50"), // send 50 USDCx to split address
 });
 
 // 3. Deposit USDCx (routing rules execute automatically)
-await vault.deposit(tokenToMicro(500));
+await vault.deposit(tokenToMicro("500"));
 
 // 4. Read vault state
 const state = await vault.getVaultState(
@@ -87,7 +87,7 @@ console.log("Locked:", state.lockedBalance);
 console.log("Available:", state.unlockedBalance);
 
 // 5. Withdraw unlocked funds
-await vault.withdraw(tokenToMicro(200));
+await vault.withdraw(tokenToMicro("200"));
 ```
 
 ---
@@ -102,6 +102,8 @@ await vault.withdraw(tokenToMicro(200));
 | `tokenContractAddress`  | `string` | Yes      | USDCx token deployer address             |
 | `tokenContractName`     | `string` | Yes      | USDCx token contract name                |
 | `senderKey`             | `string` | No*      | Private key for signing transactions     |
+| `postConditions`        | `array`  | No       | Default post-conditions for write calls  |
+| `postConditionMode`     | `string` | No       | `"allow"` or `"deny"` post-condition mode |
 
 \* Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `clearRoutingRules`). Read-only methods work without it.
 
@@ -136,7 +138,10 @@ Validates configuration and stores network / contract metadata. Throws `InvalidC
 ### setRoutingRules
 
 ```ts
-await vault.setRoutingRules(rules: RoutingRules): Promise<TransactionResult>
+await vault.setRoutingRules(
+  rules: RoutingRules,
+  options?: TransactionOptions
+): Promise<TransactionResult>
 ```
 
 Configure routing rules that execute automatically on the next deposit.
@@ -145,10 +150,10 @@ Configure routing rules that execute automatically on the next deposit.
 
 | Field            | Type             | Description                                     |
 | ---------------- | ---------------- | ----------------------------------------------- |
-| `lockAmount`     | `number`         | Amount to lock (0 = no lock)                    |
+| `lockAmount`     | `MicroAmount`    | Amount to lock (0 = no lock)                    |
 | `lockUntilBlock` | `number`         | Block height for lock expiry                    |
 | `splitAddress`   | `string \| null` | Recipient of split amount                       |
-| `splitAmount`    | `number`         | Amount forwarded to split address (0 = no split)|
+| `splitAmount`    | `MicroAmount`    | Amount forwarded to split address (0 = no split)|
 
 **Validation:** Rejects negative values, invalid addresses, zero split-address with positive split-amount, and self-splits.
 
@@ -157,29 +162,37 @@ Configure routing rules that execute automatically on the next deposit.
 ### deposit
 
 ```ts
-await vault.deposit(amount: number): Promise<TransactionResult>
+await vault.deposit(
+  amount: MicroAmount,
+  options?: TransactionOptions
+): Promise<TransactionResult>
 ```
 
 Deposit USDCx into the vault. Routing rules (lock / split / hold) are applied automatically.
 
-- `amount` — positive integer in micro-units.
+- `amount` — micro-units as `bigint`, integer `number`, or numeric `string`.
 
 ---
 
 ### withdraw
 
 ```ts
-await vault.withdraw(amount: number): Promise<TransactionResult>
+await vault.withdraw(
+  amount: MicroAmount,
+  options?: TransactionOptions
+): Promise<TransactionResult>
 ```
 
 Withdraw unlocked USDCx. Fails on-chain if amount exceeds unlocked balance.
+
+- `amount` — micro-units as `bigint`, integer `number`, or numeric `string`.
 
 ---
 
 ### clearRoutingRules
 
 ```ts
-await vault.clearRoutingRules(): Promise<TransactionResult>
+await vault.clearRoutingRules(options?: TransactionOptions): Promise<TransactionResult>
 ```
 
 Delete all routing rules for the caller. Future deposits go straight to unlocked balance.
@@ -258,8 +271,9 @@ Deposit 1000 USDCx
 
 ```ts
 import {
-  tokenToMicro,     // 1.5 → 1_500_000
-  microToToken,     // 1_500_000 → 1.5
+  tokenToMicro,     // "1.5" -> 1500000n
+  microToToken,     // 1500000 -> "1.5"
+  microToNumber,    // 1500000 -> 1500000 (throws if unsafe)
   isValidAddress,   // "ST..." → true/false
   isBlockInFuture,  // (target, current) → boolean
 } from "flowvault-sdk";
@@ -276,8 +290,11 @@ All SDK errors extend `FlowVaultError`:
 | `InvalidAmountError`        | Negative, NaN, or non-integer amount           |
 | `InvalidAddressError`       | Bad Stacks address format                      |
 | `InvalidConfigurationError` | Missing config fields or bad network           |
+| `InvalidRoutingRuleError`   | Routing rules are invalid or unsafe            |
+| `NetworkConfigurationError` | Unsupported network selection                  |
 | `ContractCallError`         | On-chain rejection (includes error code)       |
 | `NetworkError`              | RPC unreachable, timeouts                      |
+| `ParsingError`              | Contract response could not be parsed safely   |
 
 `ContractCallError` includes a `code` property mapping to FlowVault contract errors:
 
@@ -305,6 +322,32 @@ const vault = new FlowVault({ network: "mainnet", ... });
 ```
 
 The SDK passes the network string directly to `@stacks/transactions` which handles RPC endpoint resolution internally.
+
+---
+
+## Post-Conditions (Optional)
+
+You can attach post-conditions to protect token movement during `deposit` and `withdraw`.
+
+```ts
+import { PostConditionMode } from "@stacks/transactions";
+
+const vault = new FlowVault({
+  network: "testnet",
+  contractAddress: "...",
+  contractName: "flowvault",
+  tokenContractAddress: "...",
+  tokenContractName: "usdcx",
+  senderKey: process.env.STACKS_PRIVATE_KEY!,
+  postConditionMode: PostConditionMode.Deny,
+  postConditions: [/* your post-conditions */],
+});
+
+await vault.deposit(tokenToMicro("10"), {
+  postConditionMode: "deny",
+  postConditions: [/* per-call post-conditions */],
+});
+```
 
 ---
 

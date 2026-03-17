@@ -13,7 +13,7 @@ locked in the vault until the milestone block height, then released.
 
 ```ts
 await vault.setRoutingRules({
-  lockAmount: tokenToMicro(5000),  // Lock entire payment
+  lockAmount: tokenToMicro("5000"), // Lock entire payment
   lockUntilBlock: 220000,          // ~2 weeks from now
   splitAddress: null,              // No split
   splitAmount: 0,
@@ -37,13 +37,13 @@ operational expenses.
 
 ```ts
 await vault.setRoutingRules({
-  lockAmount: tokenToMicro(200),   // 20% of 1000
+  lockAmount: tokenToMicro("200"), // 20% of 1000
   lockUntilBlock: 250000,          // ~6 months from now
   splitAddress: null,
   splitAmount: 0,
 });
 
-await vault.deposit(tokenToMicro(1000));
+await vault.deposit(tokenToMicro("1000"));
 // Result: 200 locked, 800 held (unlocked)
 ```
 
@@ -67,10 +67,10 @@ await vault.setRoutingRules({
   lockAmount: 0,
   lockUntilBlock: 0,
   splitAddress: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG", // employee
-  splitAmount: tokenToMicro(3000), // monthly salary
+  splitAmount: tokenToMicro("3000"), // monthly salary
 });
 
-await vault.deposit(tokenToMicro(10000));
+await vault.deposit(tokenToMicro("10000"));
 // Result: 3000 sent to employee, 7000 held in vault
 ```
 
@@ -91,13 +91,13 @@ as a refund reserve.
 
 ```ts
 await vault.setRoutingRules({
-  lockAmount: tokenToMicro(10),    // $10 refund reserve per sub
+  lockAmount: tokenToMicro("10"),  // $10 refund reserve per sub
   lockUntilBlock: 215000,          // ~30-day refund window
   splitAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM", // partner
-  splitAmount: tokenToMicro(15),   // $15 revenue share
+  splitAmount: tokenToMicro("15"), // $15 revenue share
 });
 
-await vault.deposit(tokenToMicro(50));
+await vault.deposit(tokenToMicro("50"));
 // Result: 10 locked (refund reserve), 15 split (partner), 25 held (platform)
 ```
 

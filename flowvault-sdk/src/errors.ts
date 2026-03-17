@@ -41,6 +41,14 @@ export class InvalidAddressError extends FlowVaultError {
   }
 }
 
+/** Thrown when routing rule constraints are invalid or unsafe. */
+export class InvalidRoutingRuleError extends FlowVaultError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidRoutingRuleError";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
@@ -50,6 +58,14 @@ export class InvalidConfigurationError extends FlowVaultError {
   constructor(message: string) {
     super(message);
     this.name = "InvalidConfigurationError";
+  }
+}
+
+/** Thrown when network selection or network config is invalid. */
+export class NetworkConfigurationError extends FlowVaultError {
+  constructor(message: string) {
+    super(message);
+    this.name = "NetworkConfigurationError";
   }
 }
 
@@ -85,6 +101,21 @@ export class NetworkError extends FlowVaultError {
   constructor(message: string, cause?: unknown) {
     super(message);
     this.name = "NetworkError";
+    this.cause = cause;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Parsing
+// ---------------------------------------------------------------------------
+
+/** Thrown when a contract response cannot be parsed safely. */
+export class ParsingError extends FlowVaultError {
+  public readonly cause?: unknown;
+
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = "ParsingError";
     this.cause = cause;
   }
 }

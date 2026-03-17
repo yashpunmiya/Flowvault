@@ -8,6 +8,8 @@ import {
   InvalidConfigurationError,
   InvalidAmountError,
   InvalidAddressError,
+  InvalidRoutingRuleError,
+  NetworkConfigurationError,
 } from "../src/errors";
 
 // ---------------------------------------------------------------------------
@@ -62,6 +64,12 @@ describe("FlowVault constructor", () => {
   it("should throw on invalid network", () => {
     expect(() =>
       new FlowVault(makeConfig({ network: "devnet" as any }))
+    ).toThrow(NetworkConfigurationError);
+  });
+
+  it("should throw on invalid contract name", () => {
+    expect(() =>
+      new FlowVault(makeConfig({ contractName: "invalid name" }))
     ).toThrow(InvalidConfigurationError);
   });
 });
@@ -122,7 +130,7 @@ describe("FlowVault input validation", () => {
         splitAddress: null,
         splitAmount: 500,
       })
-    ).rejects.toThrow(InvalidAddressError);
+    ).rejects.toThrow(InvalidRoutingRuleError);
   });
 
   it("setRoutingRules rejects invalid splitAddress", async () => {
@@ -134,6 +142,23 @@ describe("FlowVault input validation", () => {
         splitAmount: 500,
       })
     ).rejects.toThrow(InvalidAddressError);
+  });
+
+  it("setRoutingRules rejects past lockUntilBlock", async () => {
+    const spy = vi
+      .spyOn(FlowVault.prototype, "getCurrentBlockHeight")
+      .mockResolvedValue(200000);
+
+    await expect(
+      vault.setRoutingRules({
+        lockAmount: 1000,
+        lockUntilBlock: 199999,
+        splitAddress: null,
+        splitAmount: 0,
+      })
+    ).rejects.toThrow(InvalidRoutingRuleError);
+
+    spy.mockRestore();
   });
 
   // -- read-only with bad address --

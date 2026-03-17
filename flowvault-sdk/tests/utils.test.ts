@@ -9,6 +9,7 @@ import {
   assertNonNegativeAmount,
   tokenToMicro,
   microToToken,
+  microToNumber,
   isBlockInFuture,
   safeNumber,
   safeString,
@@ -106,23 +107,28 @@ describe("assertNonNegativeAmount", () => {
 
 describe("tokenToMicro / microToToken", () => {
   it("should convert 1 token to 1_000_000 micro", () => {
-    expect(tokenToMicro(1)).toBe(1_000_000);
+    expect(tokenToMicro("1")).toBe(1_000_000n);
   });
 
   it("should convert 1.5 tokens", () => {
-    expect(tokenToMicro(1.5)).toBe(1_500_000);
+    expect(tokenToMicro("1.5")).toBe(1_500_000n);
   });
 
   it("should convert 0 tokens", () => {
-    expect(tokenToMicro(0)).toBe(0);
+    expect(tokenToMicro("0")).toBe(0n);
   });
 
   it("should round-trip", () => {
-    expect(microToToken(tokenToMicro(3.14159))).toBeCloseTo(3.14159, 4);
+    const micro = tokenToMicro("3.14159");
+    expect(microToToken(micro)).toBe("3.14159");
   });
 
   it("should convert micro back to tokens", () => {
-    expect(microToToken(2_500_000)).toBe(2.5);
+    expect(microToToken(2_500_000)).toBe("2.5");
+  });
+
+  it("microToNumber should return a safe number", () => {
+    expect(microToNumber(2_500_000)).toBe(2_500_000);
   });
 });
 
@@ -165,9 +171,9 @@ describe("safeNumber", () => {
     expect(safeNumber({ value: { value: 50 } })).toBe(50);
   });
 
-  it("should return 0 for null / undefined", () => {
-    expect(safeNumber(null)).toBe(0);
-    expect(safeNumber(undefined)).toBe(0);
+  it("should throw for null / undefined", () => {
+    expect(() => safeNumber(null)).toThrow();
+    expect(() => safeNumber(undefined)).toThrow();
   });
 });
 
@@ -187,5 +193,9 @@ describe("safeString", () => {
 
   it("should return null for empty string", () => {
     expect(safeString("")).toBeNull();
+  });
+
+  it("should throw on unexpected types", () => {
+    expect(() => safeString(123 as unknown as string)).toThrow();
   });
 });

@@ -82,3 +82,7 @@ transaction signing.
   delegates endpoint resolution to `@stacks/transactions` v7.
 - **No wallet abstraction** — the SDK takes a raw private key. Wallet
   integrations (Leather, Xverse) belong in the frontend layer.
+- **Post-conditions are optional** and can be provided globally (config)
+  or per call to protect token movement.
+- **Parsing is strict** — malformed contract responses throw `ParsingError`
+  instead of silently defaulting values.

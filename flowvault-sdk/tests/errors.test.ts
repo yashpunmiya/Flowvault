@@ -7,8 +7,11 @@ import {
   InvalidAmountError,
   InvalidAddressError,
   InvalidConfigurationError,
+  InvalidRoutingRuleError,
+  NetworkConfigurationError,
   ContractCallError,
   NetworkError,
+  ParsingError,
 } from "../src/errors";
 
 describe("FlowVaultError (base)", () => {
@@ -60,6 +63,24 @@ describe("InvalidConfigurationError", () => {
   });
 });
 
+describe("InvalidRoutingRuleError", () => {
+  it("should carry the message", () => {
+    const err = new InvalidRoutingRuleError("bad routing rule");
+    expect(err.name).toBe("InvalidRoutingRuleError");
+    expect(err.message).toBe("bad routing rule");
+    expect(err).toBeInstanceOf(FlowVaultError);
+  });
+});
+
+describe("NetworkConfigurationError", () => {
+  it("should carry the message", () => {
+    const err = new NetworkConfigurationError("bad network");
+    expect(err.name).toBe("NetworkConfigurationError");
+    expect(err.message).toBe("bad network");
+    expect(err).toBeInstanceOf(FlowVaultError);
+  });
+});
+
 describe("ContractCallError", () => {
   it("should carry message and optional code", () => {
     const err = new ContractCallError("funds locked", 1003);
@@ -81,6 +102,17 @@ describe("NetworkError", () => {
     const err = new NetworkError("RPC down", inner);
     expect(err.name).toBe("NetworkError");
     expect(err.message).toBe("RPC down");
+    expect(err.cause).toBe(inner);
+    expect(err).toBeInstanceOf(FlowVaultError);
+  });
+});
+
+describe("ParsingError", () => {
+  it("should carry message and cause", () => {
+    const inner = new Error("bad tuple");
+    const err = new ParsingError("Parse failed", inner);
+    expect(err.name).toBe("ParsingError");
+    expect(err.message).toBe("Parse failed");
     expect(err.cause).toBe(inner);
     expect(err).toBeInstanceOf(FlowVaultError);
   });

@@ -5,6 +5,30 @@
  * 1 USDCx = 1,000,000 micro-units (6 decimals).
  */
 
+import type { PostCondition, PostConditionMode } from "@stacks/transactions";
+
+// ---------------------------------------------------------------------------
+// Amount types
+// ---------------------------------------------------------------------------
+
+/** Acceptable amount inputs for micro-unit values. */
+export type MicroAmount = bigint | number | string;
+
+/** Acceptable amount inputs for whole-token values (string recommended). */
+export type TokenAmount = bigint | number | string;
+
+/** Post-condition mode input for configuration and call options. */
+export type PostConditionModeLike = PostConditionMode | "allow" | "deny";
+
+/** Transaction options for state-changing calls. */
+export interface TransactionOptions {
+  /** Optional post-conditions to attach to the transaction. */
+  postConditions?: PostCondition[];
+
+  /** Optional post-condition mode override. */
+  postConditionMode?: PostConditionModeLike;
+}
+
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
@@ -40,6 +64,12 @@ export interface FlowVaultConfig {
 
   /** The name of the USDCx token contract (e.g. `"usdcx"`). */
   tokenContractName: string;
+
+  /** Optional default post-conditions for state-changing calls. */
+  postConditions?: PostCondition[];
+
+  /** Optional default post-condition mode for state-changing calls. */
+  postConditionMode?: PostConditionModeLike;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,7 +83,7 @@ export interface FlowVaultConfig {
  */
 export interface RoutingRules {
   /** Amount to lock in the vault (micro-units). */
-  lockAmount: number;
+  lockAmount: MicroAmount;
 
   /** Block height until which the locked funds remain inaccessible. */
   lockUntilBlock: number;
@@ -65,7 +95,7 @@ export interface RoutingRules {
   splitAddress: string | null;
 
   /** Amount to split / forward to `splitAddress` (micro-units). */
-  splitAmount: number;
+  splitAmount: MicroAmount;
 }
 
 // ---------------------------------------------------------------------------
