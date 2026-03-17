@@ -198,7 +198,7 @@ USDCx is a bridged USDC token on Stacks that provides:
 - Full SIP-010 compatibility
 - Seamless integration with Stacks DeFi
 
-**Live on Testnet:** FlowVault is deployed and functional on Stacks testnet with real USDCx integration. Try it at [https://flowvault-delta.vercel.app](https://flowvault-delta.vercel.app)
+**Live on Testnet:** FlowVault is deployed and functional on Stacks testnet with real USDCx integration. Try it at [https://flowvaultx.vercel.app](https://flowvaultx.vercel.app)
 
 ## 📄 License
 
