@@ -1,6 +1,6 @@
 {
   "name": "flowvault-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TypeScript SDK for FlowVault — Programmable USDCx Routing on Stacks",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
