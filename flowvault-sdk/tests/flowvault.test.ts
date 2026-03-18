@@ -56,6 +56,18 @@ function makeVault() {
   });
 }
 
+function makeWalletVault(executor: ReturnType<typeof vi.fn>) {
+  return new FlowVault({
+    network: "testnet",
+    contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
+    contractName: "flowvault",
+    tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
+    tokenContractName: "usdcx",
+    senderAddress: VALID_ADDRESS,
+    contractCallExecutor: executor,
+  });
+}
+
 function mockVaultStateCv() {
   return tupleCV({
     "total-balance": uintCV(5000000),
@@ -199,6 +211,29 @@ describe("FlowVault state-changing methods (mocked)", () => {
       .calls[0][0];
     expect(callArgs.postConditions).toBe(postConditions);
     expect(callArgs.postConditionMode).toBe(PostConditionMode.Deny);
+  });
+
+  it("deposit should use custom contractCallExecutor in wallet mode", async () => {
+    const executor = vi.fn().mockResolvedValue({ txid: "0xwallet001" });
+    const vault = makeWalletVault(executor);
+
+    const result = await vault.deposit("1000000", {
+      postConditionMode: "deny",
+    });
+
+    expect(result.status).toBe("success");
+    expect(result.txId).toBe("0xwallet001");
+    expect(executor).toHaveBeenCalledOnce();
+    expect(makeContractCall).not.toHaveBeenCalled();
+  });
+
+  it("wallet mode should return fallback tx id when wallet result has no id", async () => {
+    const executor = vi.fn().mockResolvedValue({ ok: true });
+    const vault = makeWalletVault(executor);
+
+    const result = await vault.clearRoutingRules();
+    expect(result.status).toBe("success");
+    expect(result.txId).toBe("wallet-submitted");
   });
 
   it("clearRoutingRules should broadcast", async () => {

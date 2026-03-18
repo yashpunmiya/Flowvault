@@ -90,6 +90,39 @@ console.log("Available:", state.unlockedBalance);
 await vault.withdraw(tokenToMicro("200"));
 ```
 
+### Browser Wallet Mode Example
+
+```ts
+import { request } from "@stacks/connect";
+import { FlowVault, tokenToMicro } from "flowvault-sdk";
+
+const senderAddress = "ST...connected-wallet-address";
+
+const vault = new FlowVault({
+  network: "testnet",
+  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
+  contractName: "flowvault",
+  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
+  tokenContractName: "usdcx",
+  senderAddress,
+  contractCallExecutor: async (call) => {
+    return request("stx_callContract", {
+      contract: `${call.contractAddress}.${call.contractName}`,
+      functionName: call.functionName,
+      functionArgs: call.functionArgs,
+      network: call.network,
+      postConditionMode:
+        String(call.postConditionMode ?? "allow").toLowerCase().includes("deny")
+          ? "deny"
+          : "allow",
+      postConditions: call.postConditions,
+    });
+  },
+});
+
+await vault.deposit(tokenToMicro("10"));
+```
+
 ---
 
 ## Configuration
@@ -102,10 +135,14 @@ await vault.withdraw(tokenToMicro("200"));
 | `tokenContractAddress`  | `string` | Yes      | USDCx token deployer address             |
 | `tokenContractName`     | `string` | Yes      | USDCx token contract name                |
 | `senderKey`             | `string` | No*      | Private key for signing transactions     |
+| `senderAddress`         | `string` | No       | Sender address for wallet-executor mode  |
+| `contractCallExecutor`  | `func`   | No       | Custom write executor (wallet signing)   |
 | `postConditions`        | `array`  | No       | Default post-conditions for write calls  |
 | `postConditionMode`     | `string` | No       | `"allow"` or `"deny"` post-condition mode |
 
 \* Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `clearRoutingRules`). Read-only methods work without it.
+
+If you provide `contractCallExecutor`, write methods use that executor and do not require `senderKey`.
 
 ### Default Testnet Addresses
 
@@ -133,6 +170,19 @@ const vault = new FlowVault(config: FlowVaultConfig);
 
 Validates configuration and stores network / contract metadata. Throws `InvalidConfigurationError` if required fields are missing.
 
+### Signer Modes
+
+The SDK supports two write-signing modes:
+
+1. `senderKey` mode (backend/services):
+- SDK builds, signs, and broadcasts using `makeContractCall` + `broadcastTransaction`.
+
+2. `contractCallExecutor` mode (browser wallets):
+- SDK builds validated Clarity args and delegates transaction execution to your wallet adapter.
+- Useful with `@stacks/connect` where the private key is not exposed.
+
+When using `contractCallExecutor`, pass `senderAddress` from the connected wallet account so SDK validations and read helpers can use the right principal context.
+
 ---
 
 ### setRoutingRules
@@ -156,6 +206,22 @@ Configure routing rules that execute automatically on the next deposit.
 | `splitAmount`    | `MicroAmount`    | Amount forwarded to split address (0 = no split)|
 
 **Validation:** Rejects negative values, invalid addresses, zero split-address with positive split-amount, and self-splits.
+
+**Important:** when `lockAmount > 0`, `lockUntilBlock` must be strictly greater than the current chain block.
+
+Recommended pattern:
+
+```ts
+const current = await vault.getCurrentBlockHeight("ST...sender");
+const lockDuration = 144;
+
+await vault.setRoutingRules({
+  lockAmount: tokenToMicro("100"),
+  lockUntilBlock: current + lockDuration,
+  splitAddress: null,
+  splitAmount: tokenToMicro("0"),
+});
+```
 
 ---
 
@@ -351,6 +417,15 @@ await vault.deposit(tokenToMicro("10"), {
 
 ---
 
+## Common Integration Notes
+
+- Use `tokenToMicro("...")` for all user-entered token amounts.
+- Read methods can run without `senderKey`; write methods need either `senderKey` or `contractCallExecutor`.
+- In wallet mode, return wallet response objects as-is; SDK extracts `txid`/`txId`/`id` automatically.
+- For lock rules, prefer duration-based UX (`currentBlock + duration`) to avoid stale absolute inputs.
+
+---
+
 ## Development
 
 ```bash
@@ -379,7 +454,7 @@ flowvault-sdk/
 │   ├── constants.ts       — Defaults & error map
 │   ├── network.ts         — Network helpers
 │   └── utils.ts           — Validation, conversion, parsing
-├── tests/                 — Vitest test suites (86 tests)
+├── tests/                 — Vitest test suites (100 tests)
 ├── docs/                  — Extended documentation
 ├── dist/                  — Compiled output (generated)
 ├── package.json

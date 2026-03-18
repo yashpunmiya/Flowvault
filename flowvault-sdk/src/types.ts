@@ -5,7 +5,11 @@
  * 1 USDCx = 1,000,000 micro-units (6 decimals).
  */
 
-import type { PostCondition, PostConditionMode } from "@stacks/transactions";
+import type {
+  ClarityValue,
+  PostCondition,
+  PostConditionMode,
+} from "@stacks/transactions";
 
 // ---------------------------------------------------------------------------
 // Amount types
@@ -28,6 +32,27 @@ export interface TransactionOptions {
   /** Optional post-condition mode override. */
   postConditionMode?: PostConditionModeLike;
 }
+
+/** Generic input passed to custom transaction executors. */
+export interface ContractCallRequest {
+  contractAddress: string;
+  contractName: string;
+  functionName: string;
+  functionArgs: ClarityValue[];
+  network: NetworkName;
+  postConditions?: PostCondition[];
+  postConditionMode?: PostConditionModeLike;
+}
+
+/**
+ * Optional custom executor for state-changing calls.
+ *
+ * This enables browser wallet signing flows (for example via @stacks/connect)
+ * without requiring direct private-key access.
+ */
+export type ContractCallExecutor = (
+  request: ContractCallRequest
+) => Promise<unknown>;
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -70,6 +95,12 @@ export interface FlowVaultConfig {
 
   /** Optional default post-condition mode for state-changing calls. */
   postConditionMode?: PostConditionModeLike;
+
+  /** Optional sender address for read helpers and validation in wallet mode. */
+  senderAddress?: string;
+
+  /** Optional custom executor used instead of senderKey signing. */
+  contractCallExecutor?: ContractCallExecutor;
 }
 
 // ---------------------------------------------------------------------------

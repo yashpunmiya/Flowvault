@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@stacks/connect": "^8.2.4",
-    "@stacks/transactions": "^7.3.1",
     "flowvault-sdk": "file:../flowvault-sdk",
     "next": "16.1.4",
     "react": "19.2.3",

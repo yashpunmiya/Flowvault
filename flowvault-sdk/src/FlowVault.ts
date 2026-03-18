@@ -21,6 +21,7 @@ import {
 } from "@stacks/transactions";
 
 import type {
+  ContractCallExecutor,
   FlowVaultConfig,
   NetworkName,
   MicroAmount,
@@ -73,6 +74,22 @@ function toUintCVFromBlock(height: number, label: string): ClarityValue {
   return uintCV(BigInt(height));
 }
 
+function extractTxId(result: unknown): string | undefined {
+  if (typeof result === "string" && result.length > 0) {
+    return result;
+  }
+
+  if (!result || typeof result !== "object") {
+    return undefined;
+  }
+
+  const payload = result as Record<string, unknown>;
+  if (typeof payload.txid === "string") return payload.txid;
+  if (typeof payload.txId === "string") return payload.txId;
+  if (typeof payload.id === "string") return payload.id;
+  return undefined;
+}
+
 // ---------------------------------------------------------------------------
 // FlowVault class
 // ---------------------------------------------------------------------------
@@ -86,8 +103,10 @@ export class FlowVault {
   private readonly tokenContractAddress: string;
   private readonly tokenContractName: string;
   private readonly senderKey?: string;
+  private readonly senderAddress?: string;
   private readonly postConditions?: PostCondition[];
   private readonly postConditionMode?: PostConditionModeLike;
+  private readonly contractCallExecutor?: ContractCallExecutor;
 
   // -------------------------------------------------------------------------
   // Constructor
@@ -118,6 +137,9 @@ export class FlowVault {
     assertValidAddress(config.tokenContractAddress);
     assertValidContractName(config.contractName, "contractName");
     assertValidContractName(config.tokenContractName, "tokenContractName");
+    if (config.senderAddress) {
+      assertValidAddress(config.senderAddress);
+    }
 
     this.network = resolveNetwork(config.network);
     this.contractAddress = config.contractAddress;
@@ -125,8 +147,10 @@ export class FlowVault {
     this.tokenContractAddress = config.tokenContractAddress;
     this.tokenContractName = config.tokenContractName;
     this.senderKey = config.senderKey;
+    this.senderAddress = config.senderAddress;
     this.postConditions = config.postConditions;
     this.postConditionMode = config.postConditionMode;
+    this.contractCallExecutor = config.contractCallExecutor;
   }
 
   // -------------------------------------------------------------------------
@@ -145,11 +169,21 @@ export class FlowVault {
   }
 
   /** Derive the sender's Stacks address from the private key. */
-  private getSenderAddress(): string {
-    const key = this.requireSenderKey();
-    // getAddressFromPrivateKey returns the Stacks address on the configured
-    // network's version (testnet ↔ mainnet prefix).
-    return getAddressFromPrivateKey(key, this.network);
+  private getConfiguredSenderAddress(): string | null {
+    if (this.senderAddress) {
+      return this.senderAddress;
+    }
+
+    if (this.senderKey) {
+      return getAddressFromPrivateKey(this.senderKey, this.network);
+    }
+
+    return null;
+  }
+
+  /** Return a valid sender address for read-only calls. */
+  private getReadOnlySenderAddress(): string {
+    return this.getConfiguredSenderAddress() ?? this.contractAddress;
   }
 
   /** Resolve a post-condition mode input to the enum value. */
@@ -181,9 +215,43 @@ export class FlowVault {
     functionArgs: ClarityValue[],
     options?: TransactionOptions
   ): Promise<TransactionResult> {
-    const senderKey = this.requireSenderKey();
     const { postConditions, postConditionMode } =
       this.resolvePostConditions(options);
+
+    if (this.contractCallExecutor) {
+      try {
+        const result = await this.contractCallExecutor({
+          contractAddress: this.contractAddress,
+          contractName: this.contractName,
+          functionName,
+          functionArgs,
+          network: this.network,
+          postConditions,
+          postConditionMode,
+        });
+
+        return {
+          txId: extractTxId(result) ?? "wallet-submitted",
+          status: "success",
+        };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const codeMatch = msg.match(/\bu(\d{4})\b/);
+        if (codeMatch) {
+          const code = parseInt(codeMatch[1], 10);
+          const mapped = errorMessageFromCode(code);
+          if (mapped) {
+            throw new ContractCallError(mapped, code);
+          }
+        }
+        throw new NetworkError(
+          `Wallet contract call "${functionName}" failed: ${msg}`,
+          err
+        );
+      }
+    }
+
+    const senderKey = this.requireSenderKey();
 
     try {
       const transaction = await makeContractCall({
@@ -300,8 +368,8 @@ export class FlowVault {
       assertValidAddress(rules.splitAddress);
 
       // Prevent split-to-self
-      const sender = this.getSenderAddress();
-      if (rules.splitAddress === sender) {
+      const sender = this.getConfiguredSenderAddress();
+      if (sender && rules.splitAddress === sender) {
         throw new InvalidRoutingRuleError(
           "splitAddress cannot be the same as the sender (split-to-self)."
         );
@@ -310,7 +378,7 @@ export class FlowVault {
 
     if (lockAmount > 0n) {
       const currentBlock = await this.getCurrentBlockHeight(
-        this.getSenderAddress()
+        this.getReadOnlySenderAddress()
       );
       if (!isBlockInFuture(rules.lockUntilBlock, currentBlock)) {
         throw new InvalidRoutingRuleError(

@@ -43,6 +43,23 @@ const tx = await vault.setRoutingRules({
 console.log("Set rules tx:", tx.txId);
 ```
 
+For dynamic lock windows, compute from current chain height:
+
+```ts
+const currentBlock = await vault.getCurrentBlockHeight(
+  "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+);
+
+await vault.setRoutingRules({
+  lockAmount: tokenToMicro("100"),
+  lockUntilBlock: currentBlock + 144,
+  splitAddress: null,
+  splitAmount: tokenToMicro("0"),
+});
+```
+
+`lockUntilBlock` must resolve to a future block whenever `lockAmount > 0`.
+
 ## 4. Deposit USDCx
 
 ```ts
@@ -99,4 +116,38 @@ const rules = await reader.getRoutingRules("ST...");
 const height = await reader.getCurrentBlockHeight("ST...");
 ```
 
-Calling a state-changing method without `senderKey` throws `InvalidConfigurationError`.
+Calling a state-changing method without `senderKey` or `contractCallExecutor` throws `InvalidConfigurationError`.
+
+---
+
+## Browser Wallet Usage (No Private Key)
+
+Use a wallet executor when private keys are not available in the app runtime:
+
+```ts
+import { request } from "@stacks/connect";
+
+const walletVault = new FlowVault({
+  network: "testnet",
+  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
+  contractName: "flowvault",
+  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
+  tokenContractName: "usdcx",
+  senderAddress: "ST...connected-wallet-address", // required for proper sender context
+  contractCallExecutor: async (call) => {
+    return request("stx_callContract", {
+      contract: `${call.contractAddress}.${call.contractName}`,
+      functionName: call.functionName,
+      functionArgs: call.functionArgs,
+      network: call.network,
+      postConditionMode:
+        String(call.postConditionMode ?? "allow").toLowerCase().includes("deny")
+          ? "deny"
+          : "allow",
+      postConditions: call.postConditions,
+    });
+  },
+});
+
+await walletVault.deposit(tokenToMicro("50"));
+```

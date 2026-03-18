@@ -60,9 +60,10 @@ transaction signing.
 
 1. SDK validates inputs (amounts, addresses).
 2. SDK builds Clarity value arguments (`uintCV`, `principalCV`, etc.).
-3. SDK calls `makeContractCall` with the user's private key.
-4. SDK broadcasts the signed transaction via `broadcastTransaction`.
-5. SDK returns `{ txId, status }` or throws a typed error.
+3. SDK uses one of two signer paths:
+  - `senderKey` path: `makeContractCall` + `broadcastTransaction`
+  - `contractCallExecutor` path: delegates execution to your wallet adapter
+4. SDK returns `{ txId, status }` or throws a typed error.
 
 ### Read-Only Call (getVaultState / getRoutingRules)
 
@@ -80,8 +81,8 @@ transaction signing.
   clear, actionable error messages.
 - **Network is a plain string** (`"testnet"` | `"mainnet"`) — the SDK
   delegates endpoint resolution to `@stacks/transactions` v7.
-- **No wallet abstraction** — the SDK takes a raw private key. Wallet
-  integrations (Leather, Xverse) belong in the frontend layer.
+- **Signer abstraction is optional** — you can use `senderKey` for backend
+  automation or `contractCallExecutor` for browser wallet signing.
 - **Post-conditions are optional** and can be provided globally (config)
   or per call to protect token movement.
 - **Parsing is strict** — malformed contract responses throw `ParsingError`

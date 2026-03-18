@@ -13,6 +13,8 @@ export type {
   NetworkName,
   MicroAmount,
   TokenAmount,
+  ContractCallRequest,
+  ContractCallExecutor,
   RoutingRules,
   VaultState,
   TransactionResult,

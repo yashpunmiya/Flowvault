@@ -72,6 +72,12 @@ describe("FlowVault constructor", () => {
       new FlowVault(makeConfig({ contractName: "invalid name" }))
     ).toThrow(InvalidConfigurationError);
   });
+
+  it("should throw on invalid senderAddress", () => {
+    expect(() =>
+      new FlowVault(makeConfig({ senderAddress: "bad-address" }))
+    ).toThrow(InvalidAddressError);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -206,5 +212,19 @@ describe("FlowVault input validation", () => {
     await expect(readOnlyVault.clearRoutingRules()).rejects.toThrow(
       InvalidConfigurationError
     );
+  });
+
+  it("deposit works without senderKey when contractCallExecutor is provided", async () => {
+    const walletVault = new FlowVault(
+      makeConfig({
+        senderAddress: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG",
+        contractCallExecutor: vi.fn().mockResolvedValue({ txid: "0xwallet" }),
+      })
+    );
+
+    await expect(walletVault.deposit(1000)).resolves.toEqual({
+      txId: "0xwallet",
+      status: "success",
+    });
   });
 });

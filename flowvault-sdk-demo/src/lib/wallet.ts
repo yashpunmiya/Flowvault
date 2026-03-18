@@ -1,29 +1,45 @@
-export function extractStxAddress(addresses: unknown): string | null {
-  if (!addresses) return null;
+const STX_PREFIXES = ["ST", "SP", "SM", "SN"];
 
-  if (typeof addresses === "object" && addresses !== null && "stx" in addresses) {
-    const stxList = (addresses as { stx?: Array<{ address?: string }> }).stx;
-    if (Array.isArray(stxList) && stxList[0]?.address) {
-      return stxList[0].address;
+function isStacksAddress(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    STX_PREFIXES.some((prefix) => value.startsWith(prefix))
+  );
+}
+
+function searchForStacksAddress(input: unknown): string | null {
+  if (!input) return null;
+
+  if (isStacksAddress(input)) return input;
+
+  if (Array.isArray(input)) {
+    for (const item of input) {
+      const found = searchForStacksAddress(item);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (typeof input === "object") {
+    const record = input as Record<string, unknown>;
+
+    if (isStacksAddress(record.address)) return record.address;
+    if (isStacksAddress(record.stxAddress)) return record.stxAddress;
+
+    if ("stx" in record) {
+      const found = searchForStacksAddress(record.stx);
+      if (found) return found;
+    }
+
+    for (const value of Object.values(record)) {
+      const found = searchForStacksAddress(value);
+      if (found) return found;
     }
   }
 
-  if (Array.isArray(addresses)) {
-    const first = addresses.find((item) => {
-      if (!item || typeof item !== "object") return false;
-      const type = (item as { type?: string }).type;
-      return type === "stx" || type === "p2pkh";
-    }) as { address?: string } | undefined;
-
-    if (first?.address) return first.address;
-
-    const maybeAddress = addresses.find((item) => {
-      if (!item || typeof item !== "object") return false;
-      return typeof (item as { address?: unknown }).address === "string";
-    }) as { address?: string } | undefined;
-
-    if (maybeAddress?.address) return maybeAddress.address;
-  }
-
   return null;
+}
+
+export function extractStxAddress(addresses: unknown): string | null {
+  return searchForStacksAddress(addresses);
 }

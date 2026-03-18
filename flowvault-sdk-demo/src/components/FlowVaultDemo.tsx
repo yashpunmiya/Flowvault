@@ -2,64 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { connect, disconnect, getLocalStorage, isConnected, request } from "@stacks/connect";
-import {
-  contractPrincipalCV,
-  noneCV,
-  principalCV,
-  someCV,
-  uintCV,
-} from "@stacks/transactions";
+import { FlowVault, microToToken, tokenToMicro, type VaultState } from "flowvault-sdk";
 import { extractStxAddress } from "@/lib/wallet";
 
-interface VaultState {
-  totalBalance: number;
-  lockedBalance: number;
-  unlockedBalance: number;
-  lockUntilBlock: number;
-  currentBlock: number;
-  routingRules: {
-    lockAmount: number;
-    lockUntilBlock: number;
-    splitAddress: string | null;
-    splitAmount: number;
-  };
-}
-
-interface ApiError {
-  name?: string;
-  message?: string;
-  code?: unknown;
-}
-
 const DEFAULT_MODE = "allow" as const;
-const MICRO_MULTIPLIER = 1_000_000n;
-
-function tokenToMicroString(tokens: string): string {
-  const trimmed = tokens.trim();
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
-    throw new Error("Token amount must be a decimal string, example: 1.5");
-  }
-
-  const [whole, fraction = ""] = trimmed.split(".");
-  if (fraction.length > 6) {
-    throw new Error("Token amount supports up to 6 decimal places");
-  }
-
-  const padded = fraction.padEnd(6, "0");
-  return (BigInt(whole) * MICRO_MULTIPLIER + BigInt(padded || "0")).toString();
-}
-
-function microToTokenString(micro: number): string {
-  const value = BigInt(String(micro));
-  const whole = value / MICRO_MULTIPLIER;
-  const fraction = value % MICRO_MULTIPLIER;
-  if (fraction === 0n) return whole.toString();
-
-  return `${whole.toString()}.${fraction
-    .toString()
-    .padStart(6, "0")
-    .replace(/0+$/, "")}`;
-}
 
 function extractTxId(result: unknown): string | null {
   if (!result || typeof result !== "object") return null;
@@ -74,6 +20,8 @@ export function FlowVaultDemo() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [isRefreshingBlock, setIsRefreshingBlock] = useState(false);
+  const [currentBlock, setCurrentBlock] = useState<number | null>(null);
 
   const [lockAmountTokens, setLockAmountTokens] = useState("0");
   const [lockUntilBlock, setLockUntilBlock] = useState("");
@@ -106,36 +54,105 @@ export function FlowVaultDemo() {
     tokenAddress.length > 0 &&
     tokenName.length > 0;
 
+  const flowVault = useMemo(() => {
+    if (!canWrite) return null;
+
+    return new FlowVault({
+      network,
+      contractAddress: flowvaultAddress,
+      contractName: flowvaultName,
+      tokenContractAddress: tokenAddress,
+      tokenContractName: tokenName,
+      senderAddress: walletAddress ?? undefined,
+      contractCallExecutor: async (call) => {
+        const postConditionMode = String(call.postConditionMode ?? "allow")
+          .toLowerCase()
+          .includes("deny")
+          ? "deny"
+          : "allow";
+
+        return request("stx_callContract", {
+          contract: `${call.contractAddress}.${call.contractName}`,
+          functionName: call.functionName,
+          functionArgs: call.functionArgs,
+          network: call.network,
+          postConditionMode,
+          postConditions: call.postConditions,
+        });
+      },
+    });
+  }, [
+    canWrite,
+    flowvaultAddress,
+    flowvaultName,
+    network,
+    tokenAddress,
+    tokenName,
+    walletAddress,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCurrentBlock() {
+      if (!walletAddress || !flowVault) {
+        setCurrentBlock(null);
+        return;
+      }
+
+      setIsRefreshingBlock(true);
+
+      try {
+        const height = await flowVault.getCurrentBlockHeight(walletAddress);
+        if (!cancelled) {
+          setCurrentBlock(height);
+        }
+      } catch {
+        if (!cancelled) {
+          setCurrentBlock(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRefreshingBlock(false);
+        }
+      }
+    }
+
+    void loadCurrentBlock();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [walletAddress, flowVault]);
+
+  async function handleRefreshCurrentBlock() {
+    setError("");
+    setStatus("");
+
+    if (!walletAddress || !flowVault) {
+      setError("Connect wallet first.");
+      return;
+    }
+
+    setIsRefreshingBlock(true);
+
+    try {
+      const height = await flowVault.getCurrentBlockHeight(walletAddress);
+      setCurrentBlock(height);
+      setStatus(`Current block: ${height}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch current block");
+    } finally {
+      setIsRefreshingBlock(false);
+    }
+  }
+
   useEffect(() => {
     if (!isConnected()) return;
     const stored = getLocalStorage();
     const address = extractStxAddress(stored?.addresses);
     setWalletAddress(address);
   }, []);
-
-  async function callFlowVaultApi(action: string, payload: Record<string, unknown>) {
-    const response = await fetch("/api/flowvault", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ action, payload }),
-    });
-
-    const data = (await response.json()) as {
-      ok: boolean;
-      data?: unknown;
-      error?: ApiError;
-    };
-
-    if (!response.ok || !data.ok) {
-      const errorMessage = data.error?.message ?? "Request failed";
-      const errorName = data.error?.name;
-      throw new Error(errorName ? `${errorName}: ${errorMessage}` : errorMessage);
-    }
-
-    return data.data;
-  }
 
   async function handleConnect() {
     setError("");
@@ -145,8 +162,13 @@ export function FlowVaultDemo() {
     try {
       const response = await connect({ network, forceWalletSelect: true });
       const address = extractStxAddress(response.addresses);
+      if (!address) {
+        throw new Error(
+          "Connected wallet did not return a Stacks address. Please select an STX account in your wallet."
+        );
+      }
       setWalletAddress(address);
-      setStatus(address ? `Connected: ${address}` : "Connected");
+      setStatus(`Connected: ${address}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect wallet");
     } finally {
@@ -175,32 +197,54 @@ export function FlowVaultDemo() {
       setError("Missing NEXT_PUBLIC contract config in .env.local.");
       return;
     }
+    if (!flowVault) {
+      setError("Failed to initialize FlowVault SDK.");
+      return;
+    }
 
     setIsBusy(true);
 
     try {
-      const lockAmountMicro = tokenToMicroString(lockAmountTokens || "0");
-      const splitAmountMicro = tokenToMicroString(splitAmountTokens || "0");
-      const lockBlock = Number(lockUntilBlock);
+      const lockAmountMicro = tokenToMicro(lockAmountTokens || "0");
+      const splitAmountMicro = tokenToMicro(splitAmountTokens || "0");
+      const lockInput = Number(lockUntilBlock);
+      let lockBlock = 0;
+
+      if (lockAmountMicro > 0n) {
+        if (!Number.isFinite(lockInput) || !Number.isInteger(lockInput) || lockInput <= 0) {
+          throw new Error(
+            "When lockAmount > 0, enter a positive number for lockUntilBlock (duration in blocks or absolute height)."
+          );
+        }
+
+        const latestBlock = await flowVault.getCurrentBlockHeight(walletAddress);
+        setCurrentBlock(latestBlock);
+
+        // Keep compatibility with the original app: small values are treated as duration blocks.
+        lockBlock = lockInput > latestBlock ? lockInput : latestBlock + lockInput;
+      } else {
+        if (!Number.isFinite(lockInput) || !Number.isInteger(lockInput) || lockInput < 0) {
+          throw new Error("lockUntilBlock must be a non-negative integer.");
+        }
+        lockBlock = lockInput;
+      }
 
       const splitAddressTrimmed = splitAddress.trim();
 
-      const result = await request("stx_callContract", {
-        contract: `${flowvaultAddress}.${flowvaultName}`,
-        functionName: "set-routing-rules",
-        functionArgs: [
-          uintCV(BigInt(lockAmountMicro)),
-          uintCV(BigInt(lockBlock)),
-          splitAddressTrimmed.length > 0
-            ? someCV(principalCV(splitAddressTrimmed))
-            : noneCV(),
-          uintCV(BigInt(splitAmountMicro)),
-        ],
-        network,
-        postConditionMode,
-      });
+      const result = await flowVault.setRoutingRules(
+        {
+          lockAmount: lockAmountMicro,
+          lockUntilBlock: lockBlock,
+          splitAddress:
+            splitAddressTrimmed.length > 0 ? splitAddressTrimmed : null,
+          splitAmount: splitAmountMicro,
+        },
+        {
+          postConditionMode,
+        }
+      );
 
-      const txid = extractTxId(result);
+      const txid = extractTxId(result.txId);
       setStatus(
         txid
           ? `Routing rules transaction submitted: ${txid}`
@@ -226,24 +270,21 @@ export function FlowVaultDemo() {
       setError("Missing NEXT_PUBLIC contract config in .env.local.");
       return;
     }
+    if (!flowVault) {
+      setError("Failed to initialize FlowVault SDK.");
+      return;
+    }
 
     setIsBusy(true);
 
     try {
-      const amountMicro = tokenToMicroString(depositTokens || "0");
+      const amountMicro = tokenToMicro(depositTokens || "0");
 
-      const result = await request("stx_callContract", {
-        contract: `${flowvaultAddress}.${flowvaultName}`,
-        functionName: "deposit",
-        functionArgs: [
-          contractPrincipalCV(tokenAddress, tokenName),
-          uintCV(BigInt(amountMicro)),
-        ],
-        network,
+      const result = await flowVault.deposit(amountMicro, {
         postConditionMode,
       });
 
-      const txid = extractTxId(result);
+      const txid = extractTxId(result.txId);
       setStatus(
         txid
           ? `Deposit transaction submitted: ${txid}`
@@ -269,24 +310,21 @@ export function FlowVaultDemo() {
       setError("Missing NEXT_PUBLIC contract config in .env.local.");
       return;
     }
+    if (!flowVault) {
+      setError("Failed to initialize FlowVault SDK.");
+      return;
+    }
 
     setIsBusy(true);
 
     try {
-      const amountMicro = tokenToMicroString(withdrawTokens || "0");
+      const amountMicro = tokenToMicro(withdrawTokens || "0");
 
-      const result = await request("stx_callContract", {
-        contract: `${flowvaultAddress}.${flowvaultName}`,
-        functionName: "withdraw",
-        functionArgs: [
-          contractPrincipalCV(tokenAddress, tokenName),
-          uintCV(BigInt(amountMicro)),
-        ],
-        network,
+      const result = await flowVault.withdraw(amountMicro, {
         postConditionMode,
       });
 
-      const txid = extractTxId(result);
+      const txid = extractTxId(result.txId);
       setStatus(
         txid
           ? `Withdraw transaction submitted: ${txid}`
@@ -307,13 +345,15 @@ export function FlowVaultDemo() {
       setError("Connect wallet first so the app knows which address to query.");
       return;
     }
+    if (!flowVault) {
+      setError("Failed to initialize FlowVault SDK.");
+      return;
+    }
 
     setIsBusy(true);
 
     try {
-      const state = (await callFlowVaultApi("getVaultState", {
-        userAddress: walletAddress,
-      })) as VaultState;
+      const state = await flowVault.getVaultState(walletAddress);
 
       setVaultState(state);
       setStatus("Vault state loaded");
@@ -325,7 +365,7 @@ export function FlowVaultDemo() {
   }
 
   function formatMicro(micro: number): string {
-    return `${microToTokenString(micro)} USDCx (${micro} micro)`;
+    return `${microToToken(String(micro))} USDCx (${micro} micro)`;
   }
 
   return (
@@ -378,13 +418,27 @@ export function FlowVaultDemo() {
           </label>
 
           <label>
-            lockUntilBlock
+            lockUntilBlock (duration or absolute)
             <input
               type="number"
               value={lockUntilBlock}
               onChange={(e) => setLockUntilBlock(e.target.value)}
-              placeholder="210000"
+              placeholder="144 or 3902000"
             />
+            <small className="hint">
+              {currentBlock === null
+                ? "Enter duration (e.g. 144) or absolute block."
+                : `Current block: ${currentBlock}. If value is <= current block, it is treated as duration.`}
+            </small>
+            <div className="row">
+              <button
+                disabled={isBusy || isRefreshingBlock || !walletAddress}
+                onClick={handleRefreshCurrentBlock}
+                type="button"
+              >
+                {isRefreshingBlock ? "Refreshing..." : "Refresh current block"}
+              </button>
+            </div>
           </label>
 
           <label>
@@ -464,8 +518,8 @@ export function FlowVaultDemo() {
 
       <section className="card note">
         <p>
-          Write actions are signed by the connected wallet. Read actions are fetched
-          through the server API using flowvault-sdk read-only methods.
+          This demo uses FlowVault SDK directly for both write and read actions.
+          Writes are delegated to the connected wallet via contractCallExecutor.
         </p>
       </section>
     </main>
