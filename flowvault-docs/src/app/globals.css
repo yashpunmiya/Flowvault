@@ -1,0 +1,256 @@
+:root {
+  --bg: #0b0e14;
+  --bg-elev: #121826;
+  --bg-soft: #182236;
+  --fg: #eef3ff;
+  --muted: #9db0cf;
+  --accent: #ff6b35;
+  --accent-soft: rgba(255, 107, 53, 0.14);
+  --line: rgba(157, 176, 207, 0.22);
+  --success: #36d399;
+  --warning: #ffcc66;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background:
+    radial-gradient(1000px 500px at 90% -10%, rgba(255, 107, 53, 0.18), transparent 50%),
+    radial-gradient(1200px 600px at -10% -20%, rgba(54, 211, 153, 0.12), transparent 45%),
+    var(--bg);
+  color: var(--fg);
+  font-family: var(--font-display), sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.docs-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 260px;
+  gap: 24px;
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.brand-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #ff6b35, #ff915f);
+  box-shadow: 0 0 0 6px rgba(255, 107, 53, 0.12);
+}
+
+.sidebar,
+.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(24, 34, 54, 0.9), rgba(14, 20, 31, 0.9));
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.sidebar h3,
+.toc h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.nav-list,
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.nav-list a,
+.toc-list a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #d8e3fa;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.nav-list a:hover,
+.toc-list a:hover {
+  background: rgba(157, 176, 207, 0.12);
+}
+
+.main {
+  min-width: 0;
+}
+
+.hero {
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), rgba(24, 34, 54, 0.75));
+  border-radius: 22px;
+  padding: 28px;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.02;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.quick-card {
+  border: 1px solid var(--line);
+  background: rgba(11, 14, 20, 0.6);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.quick-card strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.quick-card span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.doc-section {
+  border: 1px solid var(--line);
+  background: rgba(18, 24, 38, 0.82);
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.doc-section h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
+.doc-section h3 {
+  margin: 18px 0 10px;
+  font-size: 18px;
+}
+
+.doc-section p,
+.doc-section li {
+  color: #d7e2f7;
+  line-height: 1.7;
+}
+
+.doc-section ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 12px 0;
+  color: #ffe6db;
+}
+
+.code {
+  margin: 12px 0;
+  background: #090d14;
+  border: 1px solid rgba(157, 176, 207, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+  overflow: auto;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #d4ffe8;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+@media (max-width: 1200px) {
+  .docs-shell {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .docs-shell {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .sidebar,
+  .toc {
+    position: static;
+    max-height: unset;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+}
