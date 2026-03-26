@@ -16,6 +16,10 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "FlowVault | Secure Stacks Treasury",
   description: "Programmable routing vault for USDCx on Stacks blockchain. Lock, split, and automate your stablecoin flows.",
+  other: {
+    "talentapp:project_verification":
+      "a61a14edd67b7d3264d293770ca39a911e7b422e23f5f121d131374cdc43ef1e8480f5a3c318d2bed52bb25463683f7c259ff3b85e37e717a5b0e98404d4f760",
+  },
 };
 
 export default function RootLayout({
