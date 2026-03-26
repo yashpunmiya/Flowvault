@@ -1,47 +1,60 @@
-const toc = [
-  { id: "introduction", label: "Introduction" },
-  { id: "architecture", label: "Architecture" },
-  { id: "quickstart", label: "Quick Start" },
-  { id: "contracts", label: "Smart Contracts" },
-  { id: "sdk", label: "FlowVault SDK" },
-  { id: "api", label: "SDK API Reference" },
-  { id: "frontend", label: "Frontend Integration" },
-  { id: "deployment", label: "Deployment" },
-  { id: "operations", label: "Troubleshooting" },
-];
+"use client";
 
-const navSections = [
-  {
-    group: "Getting Started",
-    links: [
-      "Introduction",
-      "Quick Start",
-      "Deployment",
-      "Frontend Integration",
-    ],
-  },
-  {
-    group: "FlowVault SDK",
-    links: [
-      "SDK Installation",
-      "SDK Configuration",
-      "SDK Write Calls",
-      "SDK Read Calls",
-      "SDK Error Handling",
-    ],
-  },
-  {
-    group: "Contracts",
-    links: [
-      "Core Functions",
-      "Routing Rules",
-      "Token Contracts",
-      "Mainnet/Testnet Addresses",
-    ],
-  },
+import { useEffect, useMemo, useState } from "react";
+
+type SectionItem = {
+  id: string;
+  label: string;
+  group: "Getting Started" | "Protocol" | "SDK" | "Operations";
+};
+
+const sections: SectionItem[] = [
+  { id: "introduction", label: "Introduction", group: "Getting Started" },
+  { id: "architecture", label: "Architecture", group: "Protocol" },
+  { id: "quickstart", label: "Quick Start", group: "Getting Started" },
+  { id: "contracts", label: "Smart Contracts", group: "Protocol" },
+  { id: "sdk", label: "FlowVault SDK", group: "SDK" },
+  { id: "api", label: "SDK API Reference", group: "SDK" },
+  { id: "frontend", label: "Frontend Integration", group: "SDK" },
+  { id: "deployment", label: "Deployment", group: "Operations" },
+  { id: "operations", label: "Troubleshooting", group: "Operations" },
 ];
 
 export default function Page() {
+  const [activeId, setActiveId] = useState<string>("introduction");
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        }
+      },
+      {
+        rootMargin: "-25% 0px -60% 0px",
+        threshold: [0.1, 0.35],
+      }
+    );
+
+    for (const section of sections) {
+      const element = document.getElementById(section.id);
+      if (element) observer.observe(element);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const groupedLinks = useMemo(() => {
+    return {
+      "Getting Started": sections.filter((item) => item.group === "Getting Started"),
+      Protocol: sections.filter((item) => item.group === "Protocol"),
+      SDK: sections.filter((item) => item.group === "SDK"),
+      Operations: sections.filter((item) => item.group === "Operations"),
+    };
+  }, []);
+
   return (
     <div className="docs-shell">
       <aside className="sidebar" aria-label="Sidebar navigation">
@@ -49,13 +62,18 @@ export default function Page() {
           <span className="brand-dot" />
           <span>FlowVault Docs</span>
         </div>
-        {navSections.map((section) => (
-          <div key={section.group} style={{ marginBottom: 16 }}>
-            <h3>{section.group}</h3>
+        {(Object.keys(groupedLinks) as Array<keyof typeof groupedLinks>).map((group) => (
+          <div key={group} style={{ marginBottom: 16 }}>
+            <h3>{group}</h3>
             <ul className="nav-list">
-              {section.links.map((link) => (
-                <li key={link}>
-                  <a href="#">{link}</a>
+              {groupedLinks[group].map((link) => (
+                <li key={link.id}>
+                  <a
+                    href={`#${link.id}`}
+                    className={activeId === link.id ? "active" : ""}
+                  >
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -67,10 +85,9 @@ export default function Page() {
         <section className="hero" id="introduction">
           <h1>FlowVault Documentation</h1>
           <p>
-            Official technical documentation for FlowVault smart contracts,
-            FlowVault SDK, and frontend integration on Stacks. This guide is
-            designed for builders shipping production apps on
-            docs.flow-vault.dev.
+            Official technical docs for FlowVault smart contracts, SDK, and
+            wallet-first frontend integration on Stacks. This site is structured
+            for real production teams deploying to docs.flow-vault.dev.
           </p>
           <div className="quick-grid">
             <div className="quick-card">
@@ -202,11 +219,18 @@ npm run dev`}
           <h2>FlowVault SDK</h2>
           <p>
             FlowVault SDK is a typed integration layer that wraps contract
-            operations with deterministic validation and parse-safe outputs.
+            operations with deterministic validation, strict parsing, and dual
+            signer support.
           </p>
 
           <h3>Install</h3>
           <div className="code">npm install flowvault-sdk@0.1.1</div>
+
+          <div className="note">
+            Write calls support two modes: senderKey (backend) and
+            contractCallExecutor (browser wallet). Read calls work without
+            senderKey.
+          </div>
 
           <h3>Basic initialization</h3>
           <div className="code">
@@ -385,9 +409,14 @@ npm run build`}
       <aside className="toc" aria-label="Table of contents">
         <h3>On this page</h3>
         <ul className="toc-list">
-          {toc.map((item) => (
+          {sections.map((item) => (
             <li key={item.id}>
-              <a href={`#${item.id}`}>{item.label}</a>
+              <a
+                href={`#${item.id}`}
+                className={activeId === item.id ? "active" : ""}
+              >
+                {item.label}
+              </a>
             </li>
           ))}
         </ul>
