@@ -203,6 +203,8 @@
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
     
     ;; Validate routing rules don't exceed deposit amount (overflow check)
+    ;; NOTE: This guard runs before lock-vs-hold checks, so contradictory routing
+    ;; configs can fail with ERR-ROUTING-EXCEEDS-DEPOSIT first.
     (asserts! (and (<= lock-amt amount) (<= split-amt amount)) ERR-ROUTING-EXCEEDS-DEPOSIT)
     (let ((total-routed (+ lock-amt split-amt)))
       (asserts! (<= total-routed amount) ERR-ROUTING-EXCEEDS-DEPOSIT)
@@ -231,6 +233,7 @@
       ;; Validate lock amount doesn't exceed hold amount
       (asserts! (<= lock-amt hold-amount) ERR-LOCK-EXCEEDS-HOLD)
       ;; Prevent lock block reduction if there are active locked funds
+      ;; Active locks can only be extended (or kept equal), never shortened.
       (asserts!
         (or
           (is-eq lock-amt u0)
@@ -302,6 +305,7 @@
     (asserts! (<= amount available-balance) ERR-FUNDS-LOCKED)
     
     ;; Transfer tokens back to user
+    ;; try! keeps this operation atomic: if transfer fails, state updates below do not execute.
     (try! (transfer-from-contract token amount withdrawer))
     
     ;; Update balances
