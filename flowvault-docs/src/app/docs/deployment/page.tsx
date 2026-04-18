@@ -10,6 +10,7 @@ export default function DeploymentPage() {
         { id: "contracts", label: "Contracts" },
         { id: "frontend", label: "Frontend" },
         { id: "docs", label: "Docs Host" },
+        { id: "release", label: "Tagged Release" },
         { id: "verify", label: "Verification" },
       ]}
     >
@@ -52,6 +53,32 @@ export default function DeploymentPage() {
           Deploy the built app to your host and map docs.flow-vault.dev as a
           custom domain.
         </p>
+      </section>
+
+      <section id="release" className="doc-section-card">
+        <h2>Tagged Release (Core Routing Patterns)</h2>
+        <p>
+          Create a release tag after validating the three core behaviors:
+          <code>time-lock</code>, <code>split</code>, and <code>hold</code>.
+        </p>
+        <pre className="doc-code">{`# 1) ensure main is up to date
+git checkout main
+git pull origin main
+
+# 2) verify contracts + sdk tests
+cd flowvault-contracts && npm test
+cd ../flowvault-sdk && npm test
+
+# 3) create annotated tag
+git tag -a v0.2.0 -m "FlowVault core routing release: time-lock, split, hold"
+
+# 4) push branch + tag
+git push origin main
+git push origin v0.2.0`}</pre>
+        <div className="doc-callout">
+          <strong>Recommended release notes:</strong> include tested scenarios,
+          contract principal, SDK version, and any migration instructions.
+        </div>
       </section>
 
       <section id="verify" className="doc-section-card">

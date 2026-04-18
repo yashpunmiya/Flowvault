@@ -5,12 +5,16 @@ export default function SdkPage() {
     <DocPage
       title="FlowVault SDK"
       summary="Typed client for FlowVault write/read operations with strict validation and wallet-safe execution options."
+      audience="Application developers and agentic coding tools"
+      mode="Reference"
       toc={[
         { id: "install", label: "Installation" },
         { id: "init", label: "Initialization" },
+        { id: "surface", label: "Method Surface" },
         { id: "write", label: "Write Calls" },
         { id: "read", label: "Read Calls" },
         { id: "practices", label: "Production Practices" },
+        { id: "agent-contract", label: "Agent Contract" },
         { id: "errors", label: "Error Handling" },
       ]}
     >
@@ -30,6 +34,43 @@ export default function SdkPage() {
 
         <h3>Browser wallet mode</h3>
         <pre className="doc-code">{`import { request } from "@stacks/connect";\nimport { FlowVault } from "flowvault-sdk";\n\nconst walletVault = new FlowVault({\n  network: "testnet",\n  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",\n  contractName: "flowvault",\n  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",\n  tokenContractName: "usdcx",\n  senderAddress: "ST...",\n  contractCallExecutor: async (call) => request("stx_callContract", {\n    contract: call.contractAddress + "." + call.contractName,\n    functionName: call.functionName,\n    functionArgs: call.functionArgs,\n    network: call.network,\n    postConditionMode: "allow",\n    postConditions: call.postConditions,\n  }),\n});`}</pre>
+      </section>
+
+      <section id="surface" className="doc-section-card">
+        <h2>Method Surface</h2>
+        <div className="doc-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Type</th>
+                <th>Returns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>setRoutingRules</td>
+                <td>Write</td>
+                <td>TransactionResult</td>
+              </tr>
+              <tr>
+                <td>deposit / withdraw</td>
+                <td>Write</td>
+                <td>TransactionResult</td>
+              </tr>
+              <tr>
+                <td>getVaultState / getRoutingRules</td>
+                <td>Read</td>
+                <td>Typed state objects</td>
+              </tr>
+              <tr>
+                <td>hasLockedFunds / getCurrentBlockHeight</td>
+                <td>Read</td>
+                <td>boolean / number</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section id="write" className="doc-section-card">
@@ -59,6 +100,27 @@ export default function SdkPage() {
           <li>Surface typed SDK errors directly for better support diagnostics.</li>
           <li>Store token amounts as strings or bigint, never floating numbers.</li>
         </ul>
+      </section>
+
+      <section id="agent-contract" className="doc-section-card">
+        <h2>Agent Contract</h2>
+        <p>
+          For reliable AI-assisted code generation, require the assistant to
+          always produce these outputs in order.
+        </p>
+        <ol>
+          <li>Environment variable schema.</li>
+          <li>FlowVault initialization code in wallet executor mode.</li>
+          <li>Four operation handlers: set rules, deposit, read state, withdraw.</li>
+          <li>Error mapping from SDK error names to user-facing messages.</li>
+          <li>Verification commands for build and runtime smoke test.</li>
+        </ol>
+        <pre className="doc-code">{`Deliverables:
+1) src/lib/flowvault.ts
+2) src/hooks/useFlowVault.ts
+3) .env.example
+4) README integration section
+5) test checklist`}</pre>
       </section>
 
       <section id="errors" className="doc-section-card">

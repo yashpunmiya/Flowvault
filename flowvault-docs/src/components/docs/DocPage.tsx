@@ -9,16 +9,24 @@ type DocPageProps = {
   title: string;
   summary: string;
   toc: TocItem[];
+  audience?: string;
+  mode?: string;
   children: ReactNode;
 };
 
-export function DocPage({ title, summary, toc, children }: DocPageProps) {
+export function DocPage({ title, summary, toc, audience, mode, children }: DocPageProps) {
   return (
     <div className="doc-page-grid">
       <article className="doc-content">
         <header className="doc-header">
           <h1>{title}</h1>
           <p>{summary}</p>
+          {(audience || mode) && (
+            <div className="doc-header-meta" aria-label="Page metadata">
+              {audience && <span>Audience: {audience}</span>}
+              {mode && <span>Mode: {mode}</span>}
+            </div>
+          )}
         </header>
         {children}
       </article>

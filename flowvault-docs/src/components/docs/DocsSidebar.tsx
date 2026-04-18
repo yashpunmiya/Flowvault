@@ -10,6 +10,7 @@ export function DocsSidebar() {
   const groups = {
     Start: docsNav.filter((item) => item.group === "Start"),
     Build: docsNav.filter((item) => item.group === "Build"),
+    Integrate: docsNav.filter((item) => item.group === "Integrate"),
     Operate: docsNav.filter((item) => item.group === "Operate"),
   };
 
