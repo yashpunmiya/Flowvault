@@ -14,6 +14,26 @@ import {
 } from "@stacks/transactions";
 import { NETWORK, CURRENT_CONTRACTS, parseContractId } from "@/lib/contracts";
 
+function safeNumber(val: unknown): number {
+  if (val === undefined || val === null) return 0;
+  if (typeof val === "bigint" || typeof val === "number") return Number(val);
+  if (typeof val === "string") return Number(val);
+  if (typeof val === "object" && "value" in val) {
+    return safeNumber((val as { value: unknown }).value);
+  }
+  return 0;
+}
+
+function safeString(val: unknown): string | null {
+  if (val === undefined || val === null) return null;
+  if (typeof val === "string") return val;
+  if (typeof val === "object" && val !== null) {
+    if ("value" in val) return safeString((val as { value: unknown }).value);
+    if ("address" in val) return safeString((val as { address: unknown }).address);
+  }
+  return String(val);
+}
+
 export interface VaultState {
   totalBalance: number;
   lockedBalance: number;
@@ -72,28 +92,6 @@ export function useFlowVault() {
       return 0;
     }
   }, []);
-
-  // Helper to safely extract values from potential Clarity value wrappers or direct values
-  const safeNumber = (val: any): number => {
-    if (val === undefined || val === null) return 0;
-    if (typeof val === "bigint" || typeof val === "number") return Number(val);
-    if (typeof val === "string") return Number(val);
-    if (typeof val === "object") {
-      if ("value" in val) return safeNumber(val.value); // Recursive unwrap
-    }
-    return 0;
-  };
-
-  const safeString = (val: any): string | null => {
-    if (val === undefined || val === null) return null;
-    if (typeof val === "string") return val;
-    if (typeof val === "object") {
-      if ("value" in val) return safeString(val.value); // Recursive unwrap
-      // Handle potential Principal object structure if different
-      if ("address" in val) return safeString(val.address);
-    }
-    return String(val); // Fallback stringify
-  };
 
   // Get vault state for an address
   const getVaultState = useCallback(async (address: string): Promise<VaultState | null> => {

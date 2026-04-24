@@ -1,8 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useWallet } from "@/context/WalletContext";
 import { useFlowVault, VaultState } from "@/hooks/useFlowVault";
+import { ModeToggle } from "@/components/ModeToggle";
+import { StrategyTemplates } from "@/components/StrategyTemplates";
+import { TransactionPreview } from "@/components/TransactionPreview";
+import { SDKPreview } from "@/components/SDKPreview";
+import {
+  StrategyMode,
+  StrategyTemplateId,
+  DEFAULT_TEMPLATE_DEPOSIT_USDCX,
+  STRATEGY_TEMPLATES,
+  applyStrategyTemplate,
+  buildTransactionPreview,
+  formatMicroToUsdcx,
+  isValidStacksAddress,
+  parseBlocksInput,
+  parseUsdcxInput,
+} from "@/lib/playground";
+
+type StrategyField = "lockAmount" | "lockBlocks" | "splitAddress" | "splitAmount";
 
 export function VaultDashboard() {
   const { wallet } = useWallet();
@@ -32,47 +50,197 @@ export function VaultDashboard() {
   const [splitAddress, setSplitAddress] = useState("");
   const [splitAmount, setSplitAmount] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [mode, setMode] = useState<StrategyMode>("beginner");
+  const [activeTemplate, setActiveTemplate] = useState<StrategyTemplateId | null>(null);
+  const [highlightedFields, setHighlightedFields] = useState<StrategyField[]>([]);
 
-  const parseUsdcxAmount = (value: string) => {
-    const num = Number(value);
-    if (!Number.isFinite(num)) return 0;
-    return Math.max(0, Math.round(num * 1e6));
-  };
+  const strategyFormRef = useRef<HTMLDivElement | null>(null);
 
-  const parseBlocks = (value: string) => {
-    const num = Number(value);
-    if (!Number.isFinite(num)) return 0;
-    return Math.max(0, Math.floor(num));
-  };
-
-  const refreshData = useCallback(async () => {
-    if (wallet.stxAddress) {
+  const fetchDashboardData = useCallback(
+    async (stxAddress: string) => {
       const [balance, state] = await Promise.all([
-        getUsdcxBalance(wallet.stxAddress),
-        getVaultState(wallet.stxAddress),
+        getUsdcxBalance(stxAddress),
+        getVaultState(stxAddress),
       ]);
-      setUsdcxBalance(balance);
-      setVaultState(state);
-    }
-  }, [wallet.stxAddress, getUsdcxBalance, getVaultState]);
+
+      return { balance, state };
+    },
+    [getUsdcxBalance, getVaultState],
+  );
 
   useEffect(() => {
-    refreshData();
-  }, [refreshData, refreshKey]);
+    if (!wallet.stxAddress) return;
+
+    let cancelled = false;
+
+    const load = async () => {
+      const { balance, state } = await fetchDashboardData(wallet.stxAddress!);
+      if (cancelled) return;
+
+      setUsdcxBalance(balance);
+      setVaultState(state);
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [wallet.stxAddress, fetchDashboardData, refreshKey]);
+
+  const parsedDepositAmount = useMemo(() => parseUsdcxInput(depositAmount), [depositAmount]);
+  const parsedWithdrawAmount = useMemo(() => parseUsdcxInput(withdrawAmount), [withdrawAmount]);
+  const parsedLockAmount = useMemo(() => parseUsdcxInput(lockAmount), [lockAmount]);
+  const parsedSplitAmount = useMemo(() => parseUsdcxInput(splitAmount), [splitAmount]);
+  const parsedLockBlocks = useMemo(() => parseBlocksInput(lockBlocks), [lockBlocks]);
+
+  const splitAddressTrimmed = splitAddress.trim();
+
+  const strategyErrors = useMemo(() => {
+    const nextErrors: Partial<Record<StrategyField, string>> = {};
+
+    if (parsedLockAmount.hasError && parsedLockAmount.error) {
+      nextErrors.lockAmount = parsedLockAmount.error;
+    }
+    if (parsedSplitAmount.hasError && parsedSplitAmount.error) {
+      nextErrors.splitAmount = parsedSplitAmount.error;
+    }
+    if (parsedLockBlocks.hasError && parsedLockBlocks.error) {
+      nextErrors.lockBlocks = parsedLockBlocks.error;
+    }
+    if (parsedLockAmount.microAmount > 0 && parsedLockBlocks.blocks <= 0) {
+      nextErrors.lockBlocks = "Savings duration must be greater than 0.";
+    }
+    if (parsedSplitAmount.microAmount > 0 && !splitAddressTrimmed) {
+      nextErrors.splitAddress = "Auto payment recipient is required.";
+    }
+    if (splitAddressTrimmed && !isValidStacksAddress(splitAddressTrimmed)) {
+      nextErrors.splitAddress = "Enter a valid Stacks address.";
+    }
+
+    return nextErrors;
+  }, [
+    parsedLockAmount.hasError,
+    parsedLockAmount.error,
+    parsedLockAmount.microAmount,
+    parsedSplitAmount.hasError,
+    parsedSplitAmount.error,
+    parsedSplitAmount.microAmount,
+    parsedLockBlocks.hasError,
+    parsedLockBlocks.error,
+    parsedLockBlocks.blocks,
+    splitAddressTrimmed,
+  ]);
+
+  const preview = useMemo(
+    () =>
+      buildTransactionPreview({
+        depositMicro: parsedDepositAmount.microAmount,
+        lockMicro: parsedLockAmount.microAmount,
+        splitMicro: parsedSplitAmount.microAmount,
+        splitAddress: splitAddressTrimmed,
+        lockBlocks: parsedLockBlocks.blocks,
+        currentBlock: vaultState?.currentBlock ?? null,
+      }),
+    [
+      parsedDepositAmount.microAmount,
+      parsedLockAmount.microAmount,
+      parsedSplitAmount.microAmount,
+      splitAddressTrimmed,
+      parsedLockBlocks.blocks,
+      vaultState?.currentBlock,
+    ],
+  );
+
+  const depositInlineError = useMemo(() => {
+    if (parsedDepositAmount.hasError) return parsedDepositAmount.error;
+    if (parsedDepositAmount.microAmount <= 0) return "Enter a deposit amount greater than 0.";
+    if (!preview.isValid) return preview.errors[0] ?? "Strategy configuration is invalid.";
+    return null;
+  }, [
+    parsedDepositAmount.hasError,
+    parsedDepositAmount.error,
+    parsedDepositAmount.microAmount,
+    preview.isValid,
+    preview.errors,
+  ]);
+
+  const withdrawInlineError = useMemo(() => {
+    if (parsedWithdrawAmount.hasError) return parsedWithdrawAmount.error;
+    if (parsedWithdrawAmount.microAmount <= 0 && withdrawAmount.trim()) {
+      return "Enter a withdrawal amount greater than 0.";
+    }
+    if ((vaultState?.unlockedBalance ?? 0) > 0 && parsedWithdrawAmount.microAmount > (vaultState?.unlockedBalance ?? 0)) {
+      return "Withdrawal amount exceeds available unlocked balance.";
+    }
+    return null;
+  }, [
+    parsedWithdrawAmount.hasError,
+    parsedWithdrawAmount.error,
+    parsedWithdrawAmount.microAmount,
+    withdrawAmount,
+    vaultState?.unlockedBalance,
+  ]);
+
+  const canSubmitRules =
+    !!vaultState &&
+    Object.keys(strategyErrors).length === 0;
+
+  const canDeposit =
+    !isLoading &&
+    parsedDepositAmount.microAmount > 0 &&
+    !depositInlineError;
+
+  const canWithdraw =
+    !isLoading &&
+    parsedWithdrawAmount.microAmount > 0 &&
+    !withdrawInlineError;
+
+  const isFieldHighlighted = (field: StrategyField) => highlightedFields.includes(field);
+
+  const inputHighlightClass = (field: StrategyField) =>
+    isFieldHighlighted(field)
+      ? "border-primary/70 ring-2 ring-primary/35 shadow-[0_0_0_1px_rgba(255,94,19,0.4)]"
+      : "";
+
+  const handleUseTemplate = useCallback(
+    (templateId: StrategyTemplateId) => {
+      const basisUsdcx =
+        parsedDepositAmount.microAmount > 0
+          ? parsedDepositAmount.microAmount / 1_000_000
+          : DEFAULT_TEMPLATE_DEPOSIT_USDCX;
+
+      const template = STRATEGY_TEMPLATES.find((item) => item.id === templateId);
+      const result = applyStrategyTemplate(templateId, basisUsdcx);
+
+      setActiveTemplate(templateId);
+      setLockAmount(result.lockAmount);
+      setSplitAmount(result.splitAmount);
+      setLockBlocks(result.lockBlocks);
+
+      if (parsedDepositAmount.microAmount <= 0) {
+        setDepositAmount(String(DEFAULT_TEMPLATE_DEPOSIT_USDCX));
+      }
+
+      const fields: StrategyField[] = ["lockAmount", "splitAmount"];
+      if (result.lockBlocks) fields.push("lockBlocks");
+      if (template?.requiresSplitAddress) fields.push("splitAddress");
+
+      setHighlightedFields(fields);
+      strategyFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.setTimeout(() => setHighlightedFields([]), 1800);
+    },
+    [parsedDepositAmount.microAmount],
+  );
 
   const handleSetRoutingRules = async () => {
     setValidationError(null);
-    const lockAmountValue = parseUsdcxAmount(lockAmount);
-    const splitAmountValue = parseUsdcxAmount(splitAmount);
-    const lockBlocksValue = parseBlocks(lockBlocks);
-    if (lockAmountValue > 0 && lockBlocksValue <= 0) {
-      setValidationError("Lock duration must be greater than 0 when lock amount is set.");
+    const firstError = Object.values(strategyErrors)[0];
+    if (firstError) {
+      setValidationError(firstError);
       return;
     }
-    if (splitAmountValue > 0 && !splitAddress) {
-      setValidationError("Split address is required when split amount is greater than 0.");
-      return;
-    }
+
     if (!wallet.stxAddress) {
       setValidationError("Wallet address not available. Please reconnect your wallet.");
       return;
@@ -82,23 +250,32 @@ export function VaultDashboard() {
       setValidationError("Unable to fetch current block height. Please try again in a moment.");
       return;
     }
+
     const success = await setRoutingRules({
-      lockAmount: lockAmountValue,
-      lockUntilBlock: currentBlock + lockBlocksValue,
-      splitAddress: splitAddress || null,
-      splitAmount: splitAmountValue,
+      lockAmount: parsedLockAmount.microAmount,
+      lockUntilBlock: currentBlock + parsedLockBlocks.blocks,
+      splitAddress: splitAddressTrimmed || null,
+      splitAmount: parsedSplitAmount.microAmount,
     });
+
     if (success) {
       setLockAmount("");
       setLockBlocks("");
       setSplitAddress("");
       setSplitAmount("");
+      setHighlightedFields([]);
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
     }
   };
 
   const handleDeposit = async () => {
-    const success = await deposit(parseUsdcxAmount(depositAmount));
+    setValidationError(null);
+    if (depositInlineError) {
+      setValidationError(depositInlineError);
+      return;
+    }
+
+    const success = await deposit(parsedDepositAmount.microAmount);
     if (success) {
       setDepositAmount("");
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
@@ -106,7 +283,13 @@ export function VaultDashboard() {
   };
 
   const handleWithdraw = async () => {
-    const success = await withdraw(parseUsdcxAmount(withdrawAmount));
+    setValidationError(null);
+    if (withdrawInlineError) {
+      setValidationError(withdrawInlineError);
+      return;
+    }
+
+    const success = await withdraw(parsedWithdrawAmount.microAmount);
     if (success) {
       setWithdrawAmount("");
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
@@ -144,13 +327,6 @@ export function VaultDashboard() {
   }
 
   const formatBalance = (amount: number) => (amount / 1e6).toFixed(2);
-  const lockAmountValue = parseUsdcxAmount(lockAmount);
-  const splitAmountValue = parseUsdcxAmount(splitAmount);
-  const lockBlocksValue = parseBlocks(lockBlocks);
-  const canSubmitRules =
-    !!vaultState &&
-    (lockAmountValue === 0 || lockBlocksValue > 0) &&
-    (splitAmountValue === 0 || !!splitAddress);
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -228,7 +404,7 @@ export function VaultDashboard() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/10 border border-primary/20 flex items-center justify-center text-primary">⚙️</div>
-              Vault Rules
+              Strategy
             </h3>
             <div className="flex items-center gap-3 text-xs font-medium">
               <div className="px-3 py-1.5 rounded-full bg-black/40 border border-white/5 text-white/40 font-mono">
@@ -244,80 +420,174 @@ export function VaultDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-            <div className="hidden md:block absolute top-0 bottom-0 left-[50%] w-px bg-white/5 -translate-x-1/2" />
+          <div className="mb-6">
+            <ModeToggle mode={mode} onChange={setMode} />
+          </div>
 
-            {/* Lock Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                </div>
-                <h4 className="text-sm font-bold text-white">Time Lock</h4>
-              </div>
-              <p className="text-[10px] text-white/40 leading-tight">Funds remain non-withdrawable until the specified block.</p>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Lock Amount</label>
-                <div className="relative group">
-                  <input
-                    type="number"
-                    value={lockAmount}
-                    onChange={(e) => setLockAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B]"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Duration (Blocks)</label>
-                <input
-                  type="number"
-                  value={lockBlocks}
-                  onChange={(e) => setLockBlocks(e.target.value)}
-                  placeholder="e.g. 144"
-                  className="input-field bg-[#0F0F11] focus:bg-[#0A0A0B]"
-                />
-                <p className="text-[10px] text-white/30 ml-1">~{(Number(lockBlocks || 0) * 10) / 60} minutes</p>
-              </div>
+          {mode === "beginner" && (
+            <div className="mb-6 pb-6 border-b border-white/5">
+              <StrategyTemplates
+                activeTemplate={activeTemplate}
+                basisDepositUsdcx={
+                  parsedDepositAmount.microAmount > 0
+                    ? parsedDepositAmount.microAmount / 1_000_000
+                    : DEFAULT_TEMPLATE_DEPOSIT_USDCX
+                }
+                onUseTemplate={handleUseTemplate}
+              />
             </div>
+          )}
 
-            {/* Split Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                </div>
-                <h4 className="text-sm font-bold text-white">Auto-Split</h4>
-              </div>
-              <p className="text-[10px] text-white/40 leading-tight">This amount is transferred immediately on deposit.</p>
+          <div ref={strategyFormRef}>
+            {mode === "advanced" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <div className="hidden md:block absolute top-0 bottom-0 left-[50%] w-px bg-white/5 -translate-x-1/2" />
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Recipient Address</label>
-                <input
-                  type="text"
-                  value={splitAddress}
-                  onChange={(e) => setSplitAddress(e.target.value)}
-                  placeholder="ST..."
-                  className="input-field font-mono text-xs bg-[#0F0F11] focus:bg-[#0A0A0B]"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Split Amount</label>
-                <div className="relative group">
-                  <input
-                    type="number"
-                    value={splitAmount}
-                    onChange={(e) => setSplitAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B]"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
+                {/* Lock Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <h4 className="text-sm font-bold text-white">Savings Lock</h4>
+                  </div>
+                  <p className="text-[10px] text-white/40 leading-tight">Funds remain non-withdrawable until the specified block.</p>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Savings Lock</label>
+                    <div className="relative group">
+                      <input
+                        type="number"
+                        min={0}
+                        value={lockAmount}
+                        onChange={(e) => setLockAmount(e.target.value)}
+                        placeholder="0.00"
+                        className={`input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("lockAmount")}`}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
+                    </div>
+                    {strategyErrors.lockAmount && <p className="text-[11px] text-red-300 ml-1">{strategyErrors.lockAmount}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Savings Duration (Blocks)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={lockBlocks}
+                      onChange={(e) => setLockBlocks(e.target.value)}
+                      placeholder="e.g. 144"
+                      className={`input-field bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("lockBlocks")}`}
+                    />
+                    <p className="text-[10px] text-white/30 ml-1">~{(Number(lockBlocks || 0) * 10) / 60} minutes</p>
+                    {strategyErrors.lockBlocks && <p className="text-[11px] text-red-300 ml-1">{strategyErrors.lockBlocks}</p>}
+                  </div>
+                </div>
+
+                {/* Split Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                    </div>
+                    <h4 className="text-sm font-bold text-white">Auto Payment</h4>
+                  </div>
+                  <p className="text-[10px] text-white/40 leading-tight">This amount is transferred immediately on deposit.</p>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Recipient Address</label>
+                    <input
+                      type="text"
+                      value={splitAddress}
+                      onChange={(e) => setSplitAddress(e.target.value)}
+                      placeholder="ST..."
+                      className={`input-field font-mono text-xs bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("splitAddress")}`}
+                    />
+                    {strategyErrors.splitAddress && <p className="text-[11px] text-red-300 ml-1">{strategyErrors.splitAddress}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Auto Payment</label>
+                    <div className="relative group">
+                      <input
+                        type="number"
+                        min={0}
+                        value={splitAmount}
+                        onChange={(e) => setSplitAmount(e.target.value)}
+                        placeholder="0.00"
+                        className={`input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("splitAmount")}`}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
+                    </div>
+                    {strategyErrors.splitAmount && <p className="text-[11px] text-red-300 ml-1">{strategyErrors.splitAmount}</p>}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Savings Lock</label>
+                    <div className="relative mt-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        value={lockAmount}
+                        onChange={(e) => setLockAmount(e.target.value)}
+                        placeholder="0.00"
+                        className={`input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("lockAmount")}`}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
+                    </div>
+                    {strategyErrors.lockAmount && <p className="text-[11px] text-red-300 ml-1 mt-1.5">{strategyErrors.lockAmount}</p>}
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Savings Duration (Blocks)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={lockBlocks}
+                      onChange={(e) => setLockBlocks(e.target.value)}
+                      placeholder="e.g. 144"
+                      className={`input-field mt-1.5 bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("lockBlocks")}`}
+                    />
+                    {strategyErrors.lockBlocks && <p className="text-[11px] text-red-300 ml-1 mt-1.5">{strategyErrors.lockBlocks}</p>}
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Auto Payment</label>
+                    <div className="relative mt-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        value={splitAmount}
+                        onChange={(e) => setSplitAmount(e.target.value)}
+                        placeholder="0.00"
+                        className={`input-field pl-4 pr-16 bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("splitAmount")}`}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-white/20">USDCx</span>
+                    </div>
+                    {strategyErrors.splitAmount && <p className="text-[11px] text-red-300 ml-1 mt-1.5">{strategyErrors.splitAmount}</p>}
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Auto Payment Recipient</label>
+                    <input
+                      type="text"
+                      value={splitAddress}
+                      onChange={(e) => setSplitAddress(e.target.value)}
+                      placeholder="ST..."
+                      className={`input-field mt-1.5 font-mono text-xs bg-[#0F0F11] focus:bg-[#0A0A0B] ${inputHighlightClass("splitAddress")}`}
+                    />
+                    {strategyErrors.splitAddress && <p className="text-[11px] text-red-300 ml-1 mt-1.5">{strategyErrors.splitAddress}</p>}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
+                  Beginner mode keeps the same contract behavior while simplifying how strategy fields are presented.
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
@@ -326,7 +596,7 @@ export function VaultDashboard() {
               disabled={isLoading || !canSubmitRules}
               className="btn-primary flex-1 py-3.5"
             >
-              {isLoading ? "Broadcasting..." : "Update Vault Rules"}
+              {isLoading ? "Broadcasting..." : "Apply Strategy"}
             </button>
             <button
               onClick={handleClearRules}
@@ -335,6 +605,16 @@ export function VaultDashboard() {
             >
               Reset
             </button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <TransactionPreview preview={preview} />
+            <SDKPreview
+              lockAmountMicro={parsedLockAmount.microAmount}
+              lockDurationBlocks={parsedLockBlocks.blocks}
+              splitAmountMicro={parsedSplitAmount.microAmount}
+              splitAddress={splitAddressTrimmed}
+            />
           </div>
         </div>
 
@@ -367,6 +647,7 @@ export function VaultDashboard() {
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
+                    min={0}
                     value={activeTab === 'deposit' ? depositAmount : withdrawAmount}
                     onChange={(e) => activeTab === 'deposit' ? setDepositAmount(e.target.value) : setWithdrawAmount(e.target.value)}
                     placeholder="0.00"
@@ -379,11 +660,22 @@ export function VaultDashboard() {
                     Max
                   </button>
                 </div>
+                {activeTab === "deposit" && depositInlineError && (
+                  <p className="text-[11px] text-red-300 mt-2">{depositInlineError}</p>
+                )}
+                {activeTab === "withdraw" && withdrawInlineError && (
+                  <p className="text-[11px] text-red-300 mt-2">{withdrawInlineError}</p>
+                )}
+                {activeTab === "deposit" && parsedDepositAmount.microAmount > 0 && (
+                  <p className="text-[10px] text-white/45 mt-2">
+                    Preview basis: {formatMicroToUsdcx(parsedDepositAmount.microAmount)} USDCx
+                  </p>
+                )}
               </div>
 
               <button
                 onClick={activeTab === 'deposit' ? handleDeposit : handleWithdraw}
-                disabled={isLoading || !(activeTab === 'deposit' ? depositAmount : withdrawAmount)}
+                disabled={activeTab === 'deposit' ? !canDeposit : !canWithdraw}
                 className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg ${activeTab === 'deposit'
                   ? 'bg-[#00D67D] hover:bg-[#00BD6F] text-black shadow-green-500/20 disabled:bg-[#00D67D]/20'
                   : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-blue-500/20 disabled:bg-[#3B82F6]/20'
@@ -397,10 +689,10 @@ export function VaultDashboard() {
           {/* Active Strategy Mini-Card - Cleaned up */}
           {vaultState && (
             <div className="glass-card-strong p-6 rounded-[24px] border-l-2 border-l-primary/50">
-              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Active Rules</h3>
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Active Strategy</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center group">
-                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Locked Amount</span>
+                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Savings Lock</span>
                   <span className="text-sm font-mono font-bold text-white">{formatBalance(vaultState.routingRules.lockAmount)}</span>
                 </div>
                 <div className="w-full h-px bg-white/5" />
@@ -411,7 +703,7 @@ export function VaultDashboard() {
                 <div className="w-full h-px bg-white/5" />
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/60">Split Recipient</span>
+                    <span className="text-sm text-white/60">Auto Payment Recipient</span>
                   </div>
                   {vaultState.routingRules.splitAddress ? (
                     <span className="text-xs font-mono text-white/80 bg-white/5 px-2 py-1 rounded border border-white/5">
