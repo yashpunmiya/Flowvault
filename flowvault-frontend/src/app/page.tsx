@@ -42,43 +42,47 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section - Compact */}
+      {/* Hero Section - Two-column for wide screens */}
       <section className="pt-10 pb-8 px-6 relative">
-        <div className="max-w-4xl mx-auto text-center space-y-4 animate-[fade-in_0.8s_ease-out]">
-          <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.1]">
-            Programmable <br />
-            <span className="text-gradient-primary">
-              USDCx Routing
-            </span>
-          </h2>
-          <p className="text-base text-white/60 max-w-xl mx-auto font-light leading-relaxed">
-            Secure, non-custodial vault management on Stacks. Automate your flows with on-chain rules.
-            <br />
-            <span className="text-primary/80 font-medium">FlowVault turns USDCx deposits into programmable on-chain actions.</span>
-          </p>
+        <div className="max-w-7xl mx-auto animate-[fade-in_0.8s_ease-out]">
+          <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8">
+            {/* Left: Headline + description + pills */}
+            <div className="text-left space-y-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.05]">
+                Programmable
+                <br />
+                <span className="text-gradient-primary">USDCx Routing</span>
+              </h2>
 
-          {/* Hero Image */}
-          <div className="flex justify-center my-6">
-            <img 
-              src="/hero_image.png" 
-              alt="FlowVault Routing Visualization" 
-              className="w-[280px] md:w-[400px] object-contain drop-shadow-[0_0_40px_rgba(255,94,19,0.3)] animate-float"
-            />
-          </div>
+              <p className="text-base text-white/60 max-w-xl font-light leading-relaxed">
+                Secure, non-custodial vault management on Stacks. Automate your flows with on-chain rules.
+                <br />
+                <span className="text-primary/80 font-medium">FlowVault turns USDCx deposits into programmable on-chain actions.</span>
+              </p>
 
-          {/* Feature Pills - Glass Style */}
-          <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
-              <span className="text-primary text-xs">🔒</span>
-              <span className="text-xs font-medium">Time-Locked</span>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+                  <span className="text-primary text-xs">🔒</span>
+                  <span className="text-xs font-medium">Time-Locked</span>
+                </div>
+                <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+                  <span className="text-purple-400 text-xs">✂️</span>
+                  <span className="text-xs font-medium">Auto-Split</span>
+                </div>
+                <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
+                  <span className="text-blue-400 text-xs">⚡</span>
+                  <span className="text-xs font-medium">Bitcoin Finality</span>
+                </div>
+              </div>
             </div>
-            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
-              <span className="text-purple-400 text-xs">✂️</span>
-              <span className="text-xs font-medium">Auto-Split</span>
-            </div>
-            <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
-              <span className="text-blue-400 text-xs">⚡</span>
-              <span className="text-xs font-medium">Bitcoin Finality</span>
+
+            {/* Right: Hero image */}
+            <div className="flex justify-center md:justify-end">
+              <img
+                src="/hero_image.png"
+                alt="FlowVault routing visualization"
+                className="w-[260px] sm:w-[320px] md:w-[420px] lg:w-[520px] object-contain drop-shadow-[0_0_40px_rgba(255,94,19,0.28)] animate-float"
+              />
             </div>
           </div>
         </div>
