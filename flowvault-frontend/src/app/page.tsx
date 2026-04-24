@@ -13,7 +13,7 @@ export default function Home() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 glass-panel border-b-0 border-white/5 bg-background/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="w-full max-w-[1800px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4 group cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
               <svg
@@ -76,13 +76,13 @@ export default function Home() {
       </section>
 
       {/* Main Dashboard */}
-      <main className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
+      <main className="w-full max-w-[1800px] mx-auto px-6 lg:px-8 pb-24 relative z-10 overflow-hidden">
         <VaultDashboard />
       </main>
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-12 bg-black/20 mt-12">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+        <div className="w-full max-w-[1800px] mx-auto px-6 text-center">
           <p className="text-white/40 text-sm">
             Built on{" "}
             <a

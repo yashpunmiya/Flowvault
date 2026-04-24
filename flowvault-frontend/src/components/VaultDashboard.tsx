@@ -397,10 +397,10 @@ export function VaultDashboard() {
       </div>
 
       {/* MAIN GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
 
-        {/* LEFT COLUMN: Router Configuration (8 cols) */}
-        <div className="lg:col-span-8 glass-card-strong p-6 rounded-[24px]">
+        {/* LEFT COLUMN: Router Configuration (5 cols) */}
+        <div className="md:col-span-6 xl:col-span-5 glass-card-strong p-6 rounded-[24px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/10 border border-primary/20 flex items-center justify-center text-primary">⚙️</div>
@@ -606,22 +606,24 @@ export function VaultDashboard() {
               Reset
             </button>
           </div>
-
-          <div className="mt-6 space-y-4">
-            <TransactionPreview preview={preview} />
-            <SDKPreview
-              lockAmountMicro={parsedLockAmount.microAmount}
-              lockDurationBlocks={parsedLockBlocks.blocks}
-              splitAmountMicro={parsedSplitAmount.microAmount}
-              splitAddress={splitAddressTrimmed}
-            />
-          </div>
         </div>
 
-        {/* RIGHT COLUMN: Active Status & Manage Funds (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Manage Funds - Tabbed */}
-          <div className="glass-card-strong p-6 rounded-[24px] relative overflow-hidden">
+        {/* MIDDLE COLUMN: Previews (4 cols) */}
+        <div className="md:col-span-6 xl:col-span-4 space-y-6">
+          <TransactionPreview preview={preview} />
+          <SDKPreview
+            lockAmountMicro={parsedLockAmount.microAmount}
+            lockDurationBlocks={parsedLockBlocks.blocks}
+            splitAmountMicro={parsedSplitAmount.microAmount}
+            splitAddress={splitAddressTrimmed}
+          />
+        </div>
+
+        {/* RIGHT COLUMN: Active Status & Manage Funds (3 cols) */}
+        <div className="md:col-span-12 xl:col-span-3 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
+            {/* Manage Funds - Tabbed */}
+            <div className="glass-card-strong p-6 rounded-[24px] relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Manage Funds</h3>
               <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 backdrop-blur-sm">
@@ -686,9 +688,8 @@ export function VaultDashboard() {
             </div>
           </div>
 
-          {/* Active Strategy Mini-Card - Cleaned up */}
           {vaultState && (
-            <div className="glass-card-strong p-6 rounded-[24px] border-l-2 border-l-primary/50">
+            <div className="glass-card-strong p-6 rounded-[24px] border-l-2 border-l-primary/50 flex flex-col justify-center">
               <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Active Strategy</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center group">
@@ -717,12 +718,13 @@ export function VaultDashboard() {
             </div>
           )}
           {vaultState && (
-            <div className="mt-4 flex justify-center">
+            <div className="mt-2 flex justify-center col-span-full">
               <p className="text-[10px] text-white/20 font-medium tracking-tight">
                 Interacting with <span className="text-primary/40">USDCx SIP-010</span> Protocol
               </p>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
