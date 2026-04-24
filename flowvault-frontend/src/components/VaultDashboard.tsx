@@ -397,10 +397,10 @@ export function VaultDashboard() {
       </div>
 
       {/* MAIN GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-
-        {/* LEFT COLUMN: Router Configuration (5 cols) */}
-        <div className="md:col-span-6 xl:col-span-5 glass-card-strong p-6 rounded-[24px]">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* LEFT COLUMN: Strategy Configuration (7 cols) */}
+        <div className="xl:col-span-7 space-y-6">
+          <div className="glass-card-strong p-6 md:p-8 rounded-[24px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/10 border border-primary/20 flex items-center justify-center text-primary">⚙️</div>
@@ -589,7 +589,7 @@ export function VaultDashboard() {
               </div>
             )}
           </div>
-
+          
           <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
             <button
               onClick={handleSetRoutingRules}
@@ -608,23 +608,58 @@ export function VaultDashboard() {
           </div>
         </div>
 
-        {/* MIDDLE COLUMN: Previews (4 cols) */}
-        <div className="md:col-span-6 xl:col-span-4 space-y-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <TransactionPreview preview={preview} />
-          <SDKPreview
-            lockAmountMicro={parsedLockAmount.microAmount}
-            lockDurationBlocks={parsedLockBlocks.blocks}
-            splitAmountMicro={parsedSplitAmount.microAmount}
-            splitAddress={splitAddressTrimmed}
-          />
+          <div className="flex flex-col h-full">
+            <SDKPreview
+              lockAmountMicro={parsedLockAmount.microAmount}
+              lockDurationBlocks={parsedLockBlocks.blocks}
+              splitAmountMicro={parsedSplitAmount.microAmount}
+              splitAddress={splitAddressTrimmed}
+            />
+          </div>
         </div>
+      </div>
 
-        {/* RIGHT COLUMN: Active Status & Manage Funds (3 cols) */}
-        <div className="md:col-span-12 xl:col-span-3 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
-            {/* Manage Funds - Tabbed */}
-            <div className="glass-card-strong p-6 rounded-[24px] relative overflow-hidden flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-6 relative z-10">
+      {/* RIGHT COLUMN: Active Status & Manage Funds */}
+      <div className="xl:col-span-5 space-y-6">
+        {/* Active Strategy Mini-Card First for Context */}
+        {vaultState && (
+          <div className="glass-card-strong p-6 md:p-8 rounded-[24px] border-l-2 border-l-primary/50">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">Active Strategy</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center group">
+                <span className="text-sm text-white/60 group-hover:text-white transition-colors">Savings Lock</span>
+                <span className="text-sm font-mono font-bold text-white">{formatBalance(vaultState.routingRules.lockAmount)}</span>
+              </div>
+              <div className="w-full h-px bg-white/5" />
+              <div className="flex justify-between items-center group">
+                <span className="text-sm text-white/60 group-hover:text-white transition-colors">Unlock Block</span>
+                <span className="text-sm font-mono font-bold text-secondary">{vaultState.routingRules.lockUntilBlock || "—"}</span>
+              </div>
+              <div className="w-full h-px bg-white/5" />
+              <div className="flex justify-between items-center group">
+                <span className="text-sm text-white/60 group-hover:text-white transition-colors">Auto Payment Recipient</span>
+                {vaultState.routingRules.splitAddress ? (
+                  <span className="text-xs font-mono text-white/80 bg-white/5 px-2 py-1 rounded border border-white/5">
+                    {vaultState.routingRules.splitAddress.slice(0, 6)}...{vaultState.routingRules.splitAddress.slice(-4)}
+                  </span>
+                ) : (
+                  <span className="text-xs text-white/30">None</span>
+                )}
+              </div>
+            </div>
+            <div className="mt-6 flex justify-center pt-4 border-t border-white/5">
+              <p className="text-[10px] text-white/20 font-medium tracking-tight">
+                Interacting with <span className="text-primary/40">USDCx SIP-010</span> Protocol
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Manage Funds - Tabbed */}
+        <div className="glass-card-strong p-6 md:p-8 rounded-[24px] relative overflow-hidden">
+          <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Manage Funds</h3>
               <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 backdrop-blur-sm">
                 <button
@@ -678,7 +713,7 @@ export function VaultDashboard() {
               <button
                 onClick={activeTab === 'deposit' ? handleDeposit : handleWithdraw}
                 disabled={activeTab === 'deposit' ? !canDeposit : !canWithdraw}
-                className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg ${activeTab === 'deposit'
+                className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(var(--color-primary),0.05)] ${activeTab === 'deposit'
                   ? 'bg-[#00D67D] hover:bg-[#00BD6F] text-black shadow-green-500/20 disabled:bg-[#00D67D]/20'
                   : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-blue-500/20 disabled:bg-[#3B82F6]/20'
                   } disabled:opacity-50 disabled:scale-100 disabled:shadow-none`}
@@ -686,44 +721,6 @@ export function VaultDashboard() {
                 {isLoading ? 'Processing...' : (activeTab === 'deposit' ? 'Confirm Deposit' : 'Confirm Withdrawal')}
               </button>
             </div>
-          </div>
-
-          {vaultState && (
-            <div className="glass-card-strong p-6 rounded-[24px] border-l-2 border-l-primary/50 flex flex-col justify-center">
-              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Active Strategy</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center group">
-                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Savings Lock</span>
-                  <span className="text-sm font-mono font-bold text-white">{formatBalance(vaultState.routingRules.lockAmount)}</span>
-                </div>
-                <div className="w-full h-px bg-white/5" />
-                <div className="flex justify-between items-center group">
-                  <span className="text-sm text-white/60 group-hover:text-white transition-colors">Unlock Block</span>
-                  <span className="text-sm font-mono font-bold text-secondary">{vaultState.routingRules.lockUntilBlock || "—"}</span>
-                </div>
-                <div className="w-full h-px bg-white/5" />
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/60">Auto Payment Recipient</span>
-                  </div>
-                  {vaultState.routingRules.splitAddress ? (
-                    <span className="text-xs font-mono text-white/80 bg-white/5 px-2 py-1 rounded border border-white/5">
-                      {vaultState.routingRules.splitAddress.slice(0, 6)}...{vaultState.routingRules.splitAddress.slice(-4)}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-white/30">None</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-          {vaultState && (
-            <div className="mt-2 flex justify-center col-span-full">
-              <p className="text-[10px] text-white/20 font-medium tracking-tight">
-                Interacting with <span className="text-primary/40">USDCx SIP-010</span> Protocol
-              </p>
-            </div>
-          )}
           </div>
         </div>
       </div>
