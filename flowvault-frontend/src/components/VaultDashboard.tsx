@@ -607,18 +607,6 @@ export function VaultDashboard() {
             </button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <TransactionPreview preview={preview} />
-          <div className="flex flex-col h-full">
-            <SDKPreview
-              lockAmountMicro={parsedLockAmount.microAmount}
-              lockDurationBlocks={parsedLockBlocks.blocks}
-              splitAmountMicro={parsedSplitAmount.microAmount}
-              splitAddress={splitAddressTrimmed}
-            />
-          </div>
-        </div>
       </div>
 
       {/* RIGHT COLUMN: Active Status & Manage Funds */}
@@ -722,6 +710,19 @@ export function VaultDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* BOTTOM FULL-WIDTH ROW: Previews */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+        <TransactionPreview preview={preview} />
+        <div className="flex flex-col h-full">
+          <SDKPreview
+            lockAmountMicro={parsedLockAmount.microAmount}
+            lockDurationBlocks={parsedLockBlocks.blocks}
+            splitAmountMicro={parsedSplitAmount.microAmount}
+            splitAddress={splitAddressTrimmed}
+          />
         </div>
       </div>
     </div>

@@ -57,6 +57,15 @@ export default function Home() {
             <span className="text-primary/80 font-medium">FlowVault turns USDCx deposits into programmable on-chain actions.</span>
           </p>
 
+          {/* Hero Image */}
+          <div className="flex justify-center my-6">
+            <img 
+              src="/hero_image.png" 
+              alt="FlowVault Routing Visualization" 
+              className="w-[280px] md:w-[400px] object-contain drop-shadow-[0_0_40px_rgba(255,94,19,0.3)] animate-float"
+            />
+          </div>
+
           {/* Feature Pills - Glass Style */}
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <div className="glass-card px-3 py-1.5 rounded-full flex items-center gap-2">
