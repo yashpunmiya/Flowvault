@@ -34,7 +34,7 @@ export default function Home() {
               <h1 className="text-xl font-bold text-white tracking-tight">FlowVault</h1>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00D67D]"></span>
-                <p className="text-xs text-white/50 font-medium">Stacks Mainnet</p>
+                <p className="text-xs text-white/50 font-medium">Stacks Testnet</p>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function Home() {
       </section>
 
       {/* Main Dashboard */}
-      <main className="w-full max-w-[1800px] mx-auto px-6 lg:px-8 pb-24 relative z-10 overflow-hidden">
+      <main className="w-full max-w-[1800px] mx-auto px-6 lg:px-8 pb-0 relative z-10 overflow-hidden">
         <VaultDashboard />
       </main>
 
