@@ -397,16 +397,16 @@ export function VaultDashboard() {
       </div>
 
       {/* MAIN GRID */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start animate-[fade-in_0.35s_cubic-bezier(0.16,1,0.3,1)]" key={`top-${mode}`}>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch animate-[fade-in_0.35s_cubic-bezier(0.16,1,0.3,1)]" key={`top-${mode}`}>
         {/* LEFT COLUMN: Strategy Configuration */}
-        <div className={mode === "beginner" ? "xl:col-span-8" : "xl:col-span-8"}>
-          <div className="glass-card-strong p-6 md:p-8 rounded-[24px]">
-          <div className="flex items-center justify-between mb-6">
+        <div className="xl:col-span-8 min-h-full">
+          <div className="glass-card-strong p-6 md:p-8 rounded-[24px] h-full flex flex-col">
+          <div className="flex items-center justify-between mb-6 gap-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-orange-500/10 border border-primary/20 flex items-center justify-center text-primary">⚙️</div>
               Strategy
             </h3>
-            <div className="flex items-center gap-3 text-xs font-medium">
+            <div className="flex items-center gap-3 text-xs font-medium shrink-0">
               <div className="px-3 py-1.5 rounded-full bg-black/40 border border-white/5 text-white/40 font-mono">
                 Block #{vaultState?.currentBlock || "..."}
               </div>
@@ -438,13 +438,13 @@ export function VaultDashboard() {
             </div>
           )}
 
-          <div ref={strategyFormRef}>
+          <div ref={strategyFormRef} className="flex-1">
             {mode === "advanced" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative h-full">
                 <div className="hidden md:block absolute top-0 bottom-0 left-[50%] w-px bg-white/5 -translate-x-1/2" />
 
                 {/* Lock Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-6 h-6 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -485,7 +485,7 @@ export function VaultDashboard() {
                 </div>
 
                 {/* Split Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
@@ -523,8 +523,8 @@ export function VaultDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-5 h-full flex flex-col">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 content-start">
                   <div>
                     <label className="text-[10px] font-semibold text-white/40 uppercase ml-1">Savings Lock</label>
                     <div className="relative mt-1.5">
@@ -590,7 +590,7 @@ export function VaultDashboard() {
             )}
           </div>
           
-          <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
+          <div className="mt-auto pt-6 border-t border-white/5 flex gap-3">
             <button
               onClick={handleSetRoutingRules}
               disabled={isLoading || !canSubmitRules}
@@ -610,7 +610,7 @@ export function VaultDashboard() {
       </div>
 
       {/* RIGHT COLUMN: Active Status & Manage Funds */}
-      <div className={mode === "beginner" ? "xl:col-span-4 space-y-5" : "xl:col-span-4 space-y-5"}>
+      <div className="xl:col-span-4 space-y-5 h-full flex flex-col">
         {/* Active Strategy Mini-Card First for Context */}
         {vaultState && (
           <div className="glass-card-strong p-6 md:p-8 rounded-[24px] border-l-2 border-l-primary/50">
@@ -646,7 +646,7 @@ export function VaultDashboard() {
         )}
 
         {/* Manage Funds - Tabbed */}
-        <div className="glass-card-strong p-6 md:p-8 rounded-[24px] relative overflow-hidden">
+        <div className="glass-card-strong p-6 md:p-8 rounded-[24px] relative overflow-hidden flex-1 flex flex-col">
           <div className="flex items-center justify-between mb-6 relative z-10">
               <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Manage Funds</h3>
               <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 backdrop-blur-sm">
@@ -661,7 +661,7 @@ export function VaultDashboard() {
               </div>
             </div>
 
-            <div className="space-y-5 relative z-10">
+            <div className="space-y-5 relative z-10 flex-1 flex flex-col">
               <div className="bg-[#0A0A0B] border border-white/5 rounded-2xl p-4 transition-colors hover:border-white/10">
                 <div className="flex justify-between text-xs mb-2">
                   <span className="text-white/40 font-medium">Amount</span>
@@ -712,7 +712,7 @@ export function VaultDashboard() {
           </div>
 
           {mode === "beginner" && (
-            <div className="animate-[fade-in_0.3s_ease-out]">
+            <div className="mt-5 animate-[fade-in_0.3s_ease-out]">
               <TransactionPreview preview={preview} />
             </div>
           )}
