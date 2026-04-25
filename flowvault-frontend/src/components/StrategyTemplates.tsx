@@ -26,7 +26,7 @@ export function StrategyTemplates({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
         {STRATEGY_TEMPLATES.map((template) => {
           const lockAmount = (previewBasis * template.lockPercent) / 100;
           const splitAmount = (previewBasis * template.splitPercent) / 100;
@@ -34,14 +34,14 @@ export function StrategyTemplates({
           return (
             <article
               key={template.id}
-              className={`rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-1 ${
+              className={`rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full ${
                 activeTemplate === template.id
                   ? "border-primary/40 bg-primary/5"
                   : "border-white/10 bg-[#0F0F11] hover:border-white/20"
               }`}
             >
               <h5 className="text-sm font-semibold text-white">{template.title}</h5>
-              <p className="text-xs text-white/55 leading-relaxed mt-2 min-h-10">
+              <p className="text-xs text-white/55 leading-relaxed mt-2">
                 {template.description}
               </p>
 
@@ -66,7 +66,7 @@ export function StrategyTemplates({
               <button
                 type="button"
                 onClick={() => onUseTemplate(template.id)}
-                className="mt-4 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-semibold text-white/85 hover:text-white hover:bg-white/10 transition-all"
+                className="mt-auto pt-4 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-semibold text-white/85 hover:text-white hover:bg-white/10 transition-all"
               >
                 Use Template
               </button>

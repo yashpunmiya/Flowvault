@@ -397,9 +397,9 @@ export function VaultDashboard() {
       </div>
 
       {/* MAIN GRID */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: Strategy Configuration (7 cols) */}
-        <div className="xl:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start animate-[fade-in_0.35s_cubic-bezier(0.16,1,0.3,1)]" key={`top-${mode}`}>
+        {/* LEFT COLUMN: Strategy Configuration */}
+        <div className={mode === "beginner" ? "xl:col-span-8" : "xl:col-span-8"}>
           <div className="glass-card-strong p-6 md:p-8 rounded-[24px]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
@@ -610,7 +610,7 @@ export function VaultDashboard() {
       </div>
 
       {/* RIGHT COLUMN: Active Status & Manage Funds */}
-      <div className="xl:col-span-5 space-y-6">
+      <div className={mode === "beginner" ? "xl:col-span-4 space-y-5" : "xl:col-span-4 space-y-5"}>
         {/* Active Strategy Mini-Card First for Context */}
         {vaultState && (
           <div className="glass-card-strong p-6 md:p-8 rounded-[24px] border-l-2 border-l-primary/50">
@@ -710,13 +710,31 @@ export function VaultDashboard() {
               </button>
             </div>
           </div>
+
+          {mode === "beginner" && (
+            <div className="animate-[fade-in_0.3s_ease-out]">
+              <TransactionPreview preview={preview} />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* BOTTOM FULL-WIDTH ROW: Previews */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-        <TransactionPreview preview={preview} />
-        <div className="flex flex-col h-full">
+      {mode === "advanced" ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch animate-[fade-in_0.35s_cubic-bezier(0.16,1,0.3,1)]" key="advanced-previews">
+          <div className="h-full">
+            <SDKPreview
+              lockAmountMicro={parsedLockAmount.microAmount}
+              lockDurationBlocks={parsedLockBlocks.blocks}
+              splitAmountMicro={parsedSplitAmount.microAmount}
+              splitAddress={splitAddressTrimmed}
+            />
+          </div>
+          <div className="h-full">
+            <TransactionPreview preview={preview} />
+          </div>
+        </div>
+      ) : (
+        <div className="animate-[fade-in_0.35s_cubic-bezier(0.16,1,0.3,1)]" key="beginner-sdk">
           <SDKPreview
             lockAmountMicro={parsedLockAmount.microAmount}
             lockDurationBlocks={parsedLockBlocks.blocks}
@@ -724,7 +742,7 @@ export function VaultDashboard() {
             splitAddress={splitAddressTrimmed}
           />
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -179,10 +179,7 @@ export function buildTransactionPreview(params: {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  if (splitMicro > 0 && !splitAddress.trim()) {
-    errors.push("Auto payment recipient is required when auto payment is set.");
-  }
-
+ 
   if (splitAddress.trim() && !isValidStacksAddress(splitAddress.trim())) {
     errors.push("Auto payment recipient must be a valid Stacks address.");
   }

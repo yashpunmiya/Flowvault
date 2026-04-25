@@ -8,7 +8,7 @@ interface TransactionPreviewProps {
 
 export function TransactionPreview({ preview }: TransactionPreviewProps) {
   return (
-    <section className="glass-card-strong rounded-[22px] p-5 space-y-4">
+    <section className="glass-card-strong rounded-[22px] p-5 space-y-4 h-full flex flex-col">
       <div>
         <h3 className="text-sm font-bold text-white">Transaction Preview</h3>
         <p className="text-xs text-white/50 mt-1">

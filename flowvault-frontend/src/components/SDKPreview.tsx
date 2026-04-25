@@ -40,7 +40,7 @@ export function SDKPreview({
   };
 
   return (
-    <section className="glass-card-strong rounded-[22px] p-5 space-y-4">
+    <section className="glass-card-strong rounded-[22px] p-5 space-y-4 h-full flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-white">Developer Integration Preview</h3>
