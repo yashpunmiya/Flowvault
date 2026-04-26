@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   applyStrategyTemplate,
+  buildStrategyExplanation,
   buildTransactionPreview,
+  getExplorerTxUrl,
   isValidStacksAddress,
   parseBlocksInput,
   parseUsdcxInput,
+  toFriendlyFlowVaultError,
 } from "./playground";
 
 describe("playground strategy templates", () => {
@@ -92,6 +95,37 @@ describe("playground preview", () => {
     );
     expect(preview.isValid).toBe(false);
   });
+
+  it("requires a recipient when split amount is configured", () => {
+    const preview = buildTransactionPreview({
+      depositMicro: 100_000_000,
+      lockMicro: 0,
+      splitMicro: 50_000_000,
+      splitAddress: "",
+      lockBlocks: 0,
+      currentBlock: 100,
+    });
+
+    expect(preview.errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("recipient address")]),
+    );
+    expect(preview.isValid).toBe(false);
+  });
+
+  it("builds human-readable strategy explanation", () => {
+    const explanation = buildStrategyExplanation({
+      depositMicro: 100_000_000,
+      lockMicro: 80_000_000,
+      splitMicro: 0,
+      availableMicro: 20_000_000,
+      lockBlocks: 144,
+      lockUntilBlock: 5144,
+    });
+
+    expect(explanation.lockPercent).toBe(80);
+    expect(explanation.keepPercent).toBe(20);
+    expect(explanation.lockUntilBlockText).toBe("block #5144");
+  });
 });
 
 describe("input validation", () => {
@@ -108,5 +142,14 @@ describe("input validation", () => {
   it("rejects invalid stacks addresses", () => {
     expect(isValidStacksAddress("abc123")).toBe(false);
     expect(isValidStacksAddress("ST1BAD")).toBe(false);
+  });
+
+  it("creates Hiro explorer transaction links", () => {
+    expect(getExplorerTxUrl("abc123")).toBe("https://explorer.hiro.so/txid/0xabc123?chain=testnet");
+  });
+
+  it("maps raw contract and wallet errors to user-friendly messages", () => {
+    expect(toFriendlyFlowVaultError("Contract failed with u1007")).toContain("recipient");
+    expect(toFriendlyFlowVaultError("User rejected request")).toContain("cancelled");
   });
 });

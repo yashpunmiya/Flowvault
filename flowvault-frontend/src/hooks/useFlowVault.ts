@@ -13,6 +13,7 @@ import {
   noneCV,
 } from "@stacks/transactions";
 import { NETWORK, CURRENT_CONTRACTS, parseContractId } from "@/lib/contracts";
+import { toFriendlyFlowVaultError } from "@/lib/playground";
 
 function safeNumber(val: unknown): number {
   if (val === undefined || val === null) return 0;
@@ -53,6 +54,26 @@ export interface RoutingRulesParams {
   lockUntilBlock: number;
   splitAddress: string | null;
   splitAmount: number;
+}
+
+export interface ContractWriteResult {
+  success: boolean;
+  txId: string | null;
+}
+
+function emptyWriteResult(): ContractWriteResult {
+  return { success: false, txId: null };
+}
+
+function extractTxId(result: unknown): string | null {
+  if (typeof result === "string" && result.length > 0) return result;
+  if (!result || typeof result !== "object") return null;
+
+  const payload = result as Record<string, unknown>;
+  if (typeof payload.txid === "string") return payload.txid;
+  if (typeof payload.txId === "string") return payload.txId;
+  if (typeof payload.id === "string") return payload.id;
+  return null;
 }
 
 export function useFlowVault() {
@@ -180,14 +201,14 @@ export function useFlowVault() {
   }, []);
 
   // Set routing rules
-  const setRoutingRules = useCallback(async (params: RoutingRulesParams): Promise<boolean> => {
+  const setRoutingRules = useCallback(async (params: RoutingRulesParams): Promise<ContractWriteResult> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.flowvault);
 
-      await request("stx_callContract", {
+      const result = await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "set-routing-rules",
         functionArgs: [
@@ -200,17 +221,18 @@ export function useFlowVault() {
         postConditionMode: "allow",
       });
 
-      return true;
+      return { success: true, txId: extractTxId(result) };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to set routing rules");
-      return false;
+      const message = err instanceof Error ? err.message : String(err);
+      setError(toFriendlyFlowVaultError(message));
+      return emptyWriteResult();
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // Deposit USDCx to vault
-  const deposit = useCallback(async (amount: number): Promise<boolean> => {
+  const deposit = useCallback(async (amount: number): Promise<ContractWriteResult> => {
     setIsLoading(true);
     setError(null);
 
@@ -218,7 +240,7 @@ export function useFlowVault() {
       const { address: vaultAddr, name: vaultName } = parseContractId(CURRENT_CONTRACTS.flowvault);
       const { address: tokenAddr, name: tokenName } = parseContractId(CURRENT_CONTRACTS.usdcx);
 
-      await request("stx_callContract", {
+      const result = await request("stx_callContract", {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "deposit",
         functionArgs: [
@@ -229,17 +251,18 @@ export function useFlowVault() {
         postConditionMode: "allow",
       });
 
-      return true;
+      return { success: true, txId: extractTxId(result) };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to deposit");
-      return false;
+      const message = err instanceof Error ? err.message : String(err);
+      setError(toFriendlyFlowVaultError(message));
+      return emptyWriteResult();
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // Withdraw from vault
-  const withdraw = useCallback(async (amount: number): Promise<boolean> => {
+  const withdraw = useCallback(async (amount: number): Promise<ContractWriteResult> => {
     setIsLoading(true);
     setError(null);
 
@@ -247,7 +270,7 @@ export function useFlowVault() {
       const { address: vaultAddr, name: vaultName } = parseContractId(CURRENT_CONTRACTS.flowvault);
       const { address: tokenAddr, name: tokenName } = parseContractId(CURRENT_CONTRACTS.usdcx);
 
-      await request("stx_callContract", {
+      const result = await request("stx_callContract", {
         contract: `${vaultAddr}.${vaultName}`,
         functionName: "withdraw",
         functionArgs: [
@@ -258,24 +281,25 @@ export function useFlowVault() {
         postConditionMode: "allow",
       });
 
-      return true;
+      return { success: true, txId: extractTxId(result) };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to withdraw");
-      return false;
+      const message = err instanceof Error ? err.message : String(err);
+      setError(toFriendlyFlowVaultError(message));
+      return emptyWriteResult();
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // Clear routing rules
-  const clearRoutingRules = useCallback(async (): Promise<boolean> => {
+  const clearRoutingRules = useCallback(async (): Promise<ContractWriteResult> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.flowvault);
 
-      await request("stx_callContract", {
+      const result = await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "clear-routing-rules",
         functionArgs: [],
@@ -283,24 +307,25 @@ export function useFlowVault() {
         postConditionMode: "allow",
       });
 
-      return true;
+      return { success: true, txId: extractTxId(result) };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to clear routing rules");
-      return false;
+      const message = err instanceof Error ? err.message : String(err);
+      setError(toFriendlyFlowVaultError(message));
+      return emptyWriteResult();
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // Request tokens from faucet (for testing)
-  const requestFaucet = useCallback(async (amount: number): Promise<boolean> => {
+  const requestFaucet = useCallback(async (amount: number): Promise<ContractWriteResult> => {
     setIsLoading(true);
     setError(null);
 
     try {
       const { address, name } = parseContractId(CURRENT_CONTRACTS.usdcx);
 
-      await request("stx_callContract", {
+      const result = await request("stx_callContract", {
         contract: `${address}.${name}`,
         functionName: "faucet",
         functionArgs: [toUint(amount)],
@@ -308,10 +333,11 @@ export function useFlowVault() {
         postConditionMode: "allow",
       });
 
-      return true;
+      return { success: true, txId: extractTxId(result) };
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to request from faucet");
-      return false;
+      const message = err instanceof Error ? err.message : String(err);
+      setError(toFriendlyFlowVaultError(message));
+      return emptyWriteResult();
     } finally {
       setIsLoading(false);
     }

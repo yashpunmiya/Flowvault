@@ -45,6 +45,17 @@ export interface TransactionPreviewModel {
   isValid: boolean;
 }
 
+export interface StrategyExplanationModel {
+  lockPercent: number;
+  splitPercent: number;
+  keepPercent: number;
+  lockAmountText: string;
+  splitAmountText: string;
+  keepAmountText: string;
+  lockDurationText: string;
+  lockUntilBlockText: string;
+}
+
 export const USDCX_DECIMALS = 1_000_000;
 export const DEFAULT_TEMPLATE_DEPOSIT_USDCX = 100;
 
@@ -80,7 +91,13 @@ export const STRATEGY_TEMPLATES: StrategyTemplate[] = [
 ];
 
 export function formatMicroToUsdcx(microAmount: number): string {
-  return (microAmount / USDCX_DECIMALS).toFixed(2);
+  const value = microAmount / USDCX_DECIMALS;
+  if (!Number.isFinite(value)) return "0.00";
+  if (value === 0) return "0.00";
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 6,
+  });
 }
 
 export function parseUsdcxInput(value: string): ParsedUsdcxInput {
@@ -179,7 +196,10 @@ export function buildTransactionPreview(params: {
   const errors: string[] = [];
   const warnings: string[] = [];
 
- 
+  if (splitMicro > 0 && !splitAddress.trim()) {
+    errors.push("Add a recipient address for the auto payment.");
+  }
+
   if (splitAddress.trim() && !isValidStacksAddress(splitAddress.trim())) {
     errors.push("Auto payment recipient must be a valid Stacks address.");
   }
@@ -217,6 +237,83 @@ export function buildTransactionPreview(params: {
     warnings,
     isValid: errors.length === 0,
   };
+}
+
+export function getExplorerTxUrl(txId: string, network = "testnet"): string {
+  const clean = txId.startsWith("0x") ? txId : `0x${txId}`;
+  return `https://explorer.hiro.so/txid/${clean}?chain=${network}`;
+}
+
+export function buildStrategyExplanation(params: {
+  depositMicro: number;
+  lockMicro: number;
+  splitMicro: number;
+  availableMicro: number;
+  lockBlocks: number;
+  lockUntilBlock: number | null;
+}): StrategyExplanationModel {
+  const { depositMicro, lockMicro, splitMicro, availableMicro, lockBlocks, lockUntilBlock } = params;
+  const percent = (amount: number) =>
+    depositMicro > 0 ? Math.round((amount / depositMicro) * 100) : 0;
+
+  return {
+    lockPercent: percent(lockMicro),
+    splitPercent: percent(splitMicro),
+    keepPercent: percent(availableMicro),
+    lockAmountText: formatMicroToUsdcx(lockMicro),
+    splitAmountText: formatMicroToUsdcx(splitMicro),
+    keepAmountText: formatMicroToUsdcx(availableMicro),
+    lockDurationText: lockBlocks > 0 ? `${lockBlocks} blocks` : "no lock",
+    lockUntilBlockText: lockUntilBlock ? `block #${lockUntilBlock}` : "not scheduled",
+  };
+}
+
+export function describeActivityStatus(params: {
+  type: "deposit" | "withdraw";
+  lockedMicro: number;
+  unlockBlock: number | null;
+  currentBlock: number | null;
+}): "locked" | "unlocked" | "submitted" {
+  if (params.type === "withdraw") return "submitted";
+  if (!params.unlockBlock || params.lockedMicro <= 0) return "unlocked";
+  if (params.currentBlock !== null && params.currentBlock >= params.unlockBlock) {
+    return "unlocked";
+  }
+  return "locked";
+}
+
+export function toFriendlyFlowVaultError(message: string): string {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("user rejected") || lower.includes("cancel")) {
+    return "Transaction cancelled in your wallet.";
+  }
+  if (message.includes("u1001") || lower.includes("invalid amount")) {
+    return "Enter an amount greater than 0.";
+  }
+  if (message.includes("u1002") || lower.includes("insufficient balance")) {
+    return "You do not have enough USDCx for this action.";
+  }
+  if (message.includes("u1003") || lower.includes("locked")) {
+    return "That amount is still locked and cannot be withdrawn yet.";
+  }
+  if (message.includes("u1004") || lower.includes("routing")) {
+    return "Your lock and auto payment amounts exceed the deposit amount.";
+  }
+  if (message.includes("u1007") || lower.includes("split address")) {
+    return "Add a recipient address for the auto payment.";
+  }
+  if (message.includes("u1008") || lower.includes("lock block")) {
+    return "Choose a lock duration that ends at a future Stacks block.";
+  }
+  if (message.includes("u1010")) {
+    return "The locked amount cannot exceed what remains after auto payment.";
+  }
+  if (message.includes("u1011") || lower.includes("split-to-self")) {
+    return "Auto payment recipient cannot be your connected wallet.";
+  }
+
+  return "The transaction could not be submitted. Check your wallet and try again.";
 }
 
 export function buildDeveloperPreviewSnippet(params: {

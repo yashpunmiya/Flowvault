@@ -13,14 +13,37 @@ import {
   DEFAULT_TEMPLATE_DEPOSIT_USDCX,
   STRATEGY_TEMPLATES,
   applyStrategyTemplate,
+  buildStrategyExplanation,
   buildTransactionPreview,
+  describeActivityStatus,
   formatMicroToUsdcx,
+  getExplorerTxUrl,
   isValidStacksAddress,
   parseBlocksInput,
   parseUsdcxInput,
 } from "@/lib/playground";
 
 type StrategyField = "lockAmount" | "lockBlocks" | "splitAddress" | "splitAmount";
+type ActivityType = "deposit" | "withdraw";
+
+interface ActivityItem {
+  id: string;
+  type: ActivityType;
+  amountMicro: number;
+  lockedMicro: number;
+  availableMicro: number;
+  unlockBlock: number | null;
+  txId: string | null;
+  createdAt: string;
+}
+
+interface OutcomeState {
+  savedMicro: number;
+  availableMicro: number;
+  unlockBlock: number | null;
+  depositTxId: string | null;
+  strategyTxId: string | null;
+}
 
 export function VaultDashboard() {
   const { wallet } = useWallet();
@@ -53,6 +76,9 @@ export function VaultDashboard() {
   const [mode, setMode] = useState<StrategyMode>("beginner");
   const [activeTemplate, setActiveTemplate] = useState<StrategyTemplateId | null>(null);
   const [highlightedFields, setHighlightedFields] = useState<StrategyField[]>([]);
+  const [outcome, setOutcome] = useState<OutcomeState | null>(null);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [lastStrategyTxId, setLastStrategyTxId] = useState<string | null>(null);
 
   const strategyFormRef = useRef<HTMLDivElement | null>(null);
 
@@ -152,6 +178,41 @@ export function VaultDashboard() {
     ],
   );
 
+  const strategyExplanation = useMemo(
+    () =>
+      buildStrategyExplanation({
+        depositMicro: parsedDepositAmount.microAmount,
+        lockMicro: parsedLockAmount.microAmount,
+        splitMicro: parsedSplitAmount.microAmount,
+        availableMicro: preview.availableMicro,
+        lockBlocks: parsedLockBlocks.blocks,
+        lockUntilBlock: preview.lockUntilBlock,
+      }),
+    [
+      parsedDepositAmount.microAmount,
+      parsedLockAmount.microAmount,
+      parsedSplitAmount.microAmount,
+      parsedLockBlocks.blocks,
+      preview.availableMicro,
+      preview.lockUntilBlock,
+    ],
+  );
+
+  const addActivity = useCallback((item: Omit<ActivityItem, "id" | "createdAt">) => {
+    const id = `${Date.now()}-${item.type}-${item.amountMicro}`;
+    setActivity((current) => [
+      {
+        ...item,
+        id,
+        createdAt: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+      ...current,
+    ].slice(0, 6));
+  }, []);
+
   const depositInlineError = useMemo(() => {
     if (parsedDepositAmount.hasError) return parsedDepositAmount.error;
     if (parsedDepositAmount.microAmount <= 0) return "Enter a deposit amount greater than 0.";
@@ -217,6 +278,7 @@ export function VaultDashboard() {
       setLockAmount(result.lockAmount);
       setSplitAmount(result.splitAmount);
       setLockBlocks(result.lockBlocks);
+      setValidationError(null);
 
       if (parsedDepositAmount.microAmount <= 0) {
         setDepositAmount(String(DEFAULT_TEMPLATE_DEPOSIT_USDCX));
@@ -227,7 +289,10 @@ export function VaultDashboard() {
       if (template?.requiresSplitAddress) fields.push("splitAddress");
 
       setHighlightedFields(fields);
-      strategyFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (template?.requiresSplitAddress) {
+        setValidationError("Add one recipient address, then apply this strategy.");
+      }
+
       window.setTimeout(() => setHighlightedFields([]), 1800);
     },
     [parsedDepositAmount.microAmount],
@@ -251,18 +316,15 @@ export function VaultDashboard() {
       return;
     }
 
-    const success = await setRoutingRules({
+    const result = await setRoutingRules({
       lockAmount: parsedLockAmount.microAmount,
       lockUntilBlock: currentBlock + parsedLockBlocks.blocks,
       splitAddress: splitAddressTrimmed || null,
       splitAmount: parsedSplitAmount.microAmount,
     });
 
-    if (success) {
-      setLockAmount("");
-      setLockBlocks("");
-      setSplitAddress("");
-      setSplitAmount("");
+    if (result.success) {
+      setLastStrategyTxId(result.txId);
       setHighlightedFields([]);
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
     }
@@ -275,8 +337,24 @@ export function VaultDashboard() {
       return;
     }
 
-    const success = await deposit(parsedDepositAmount.microAmount);
-    if (success) {
+    const result = await deposit(parsedDepositAmount.microAmount);
+    if (result.success) {
+      const nextOutcome: OutcomeState = {
+        savedMicro: preview.lockMicro,
+        availableMicro: preview.availableMicro,
+        unlockBlock: preview.lockUntilBlock,
+        depositTxId: result.txId,
+        strategyTxId: lastStrategyTxId,
+      };
+      setOutcome(nextOutcome);
+      addActivity({
+        type: "deposit",
+        amountMicro: parsedDepositAmount.microAmount,
+        lockedMicro: preview.lockMicro,
+        availableMicro: preview.availableMicro,
+        unlockBlock: preview.lockUntilBlock,
+        txId: result.txId,
+      });
       setDepositAmount("");
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
     }
@@ -289,16 +367,25 @@ export function VaultDashboard() {
       return;
     }
 
-    const success = await withdraw(parsedWithdrawAmount.microAmount);
-    if (success) {
+    const result = await withdraw(parsedWithdrawAmount.microAmount);
+    if (result.success) {
+      addActivity({
+        type: "withdraw",
+        amountMicro: parsedWithdrawAmount.microAmount,
+        lockedMicro: 0,
+        availableMicro: parsedWithdrawAmount.microAmount,
+        unlockBlock: null,
+        txId: result.txId,
+      });
       setWithdrawAmount("");
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
     }
   };
 
   const handleClearRules = async () => {
-    const success = await clearRoutingRules();
-    if (success) {
+    const result = await clearRoutingRules();
+    if (result.success) {
+      setLastStrategyTxId(null);
       setTimeout(() => setRefreshKey((k) => k + 1), 2000);
     }
   };
@@ -336,6 +423,45 @@ export function VaultDashboard() {
           {validationError && <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 px-6 py-4 rounded-xl backdrop-blur-md">{validationError}</div>}
           {error && <div className="bg-red-500/10 border border-red-500/20 text-red-200 px-6 py-4 rounded-xl backdrop-blur-md">{error}</div>}
         </div>
+      )}
+
+      {outcome && (
+        <section className="glass-card-strong rounded-[22px] p-5 border border-[#00D67D]/20 bg-[#00D67D]/5 animate-fade-in">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#00D67D]/80">Deposit successful</p>
+              <h3 className="mt-1 text-xl font-bold text-white">
+                You saved {formatMicroToUsdcx(outcome.savedMicro)} USDCx
+              </h3>
+              <p className="mt-1 text-sm text-white/60">
+                {formatMicroToUsdcx(outcome.availableMicro)} USDCx available now
+                {outcome.unlockBlock ? ` · unlocks at block #${outcome.unlockBlock}` : " · no lock set"}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {outcome.depositTxId && (
+                <a
+                  href={getExplorerTxUrl(outcome.depositTxId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl border border-[#00D67D]/30 bg-[#00D67D]/10 px-4 py-2 text-xs font-bold text-[#B5FFDF] hover:bg-[#00D67D]/15 transition-colors"
+                >
+                  View deposit tx
+                </a>
+              )}
+              {outcome.strategyTxId && (
+                <a
+                  href={getExplorerTxUrl(outcome.strategyTxId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/75 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  View strategy tx
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* TOP ROW: Stats Cards - Made more compact */}
@@ -423,6 +549,52 @@ export function VaultDashboard() {
           <div className="mb-6">
             <ModeToggle mode={mode} onChange={setMode} />
           </div>
+
+          <section className="mb-6 rounded-2xl border border-white/10 bg-[#0A0A0B]/70 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h4 className="text-sm font-bold text-white">Every deposit will</h4>
+                <p className="mt-1 text-xs text-white/50">
+                  Human-readable outcome based on your current strategy inputs.
+                </p>
+              </div>
+              <span
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase text-white/45"
+                title="A Stacks block is the chain height used by the contract to decide whether locked funds can be withdrawn."
+              >
+                Block #{vaultState?.currentBlock || "..."}
+              </span>
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 p-3">
+                <p className="text-[10px] font-bold uppercase text-purple-200/70">Lock</p>
+                <p className="mt-1 text-sm font-bold text-white">
+                  {strategyExplanation.lockPercent}% ({strategyExplanation.lockAmountText} USDCx)
+                </p>
+                <p className="mt-1 text-[11px] text-white/45" title="Locked funds cannot be withdrawn until the unlock block.">
+                  Until {strategyExplanation.lockUntilBlockText}
+                </p>
+              </div>
+              <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
+                <p className="text-[10px] font-bold uppercase text-blue-200/70">Send</p>
+                <p className="mt-1 text-sm font-bold text-white">
+                  {strategyExplanation.splitPercent}% ({strategyExplanation.splitAmountText} USDCx)
+                </p>
+                <p className="mt-1 text-[11px] text-white/45" title="Split amount is transferred to the recipient during deposit.">
+                  {splitAddressTrimmed ? "To recipient" : "No recipient set"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3">
+                <p className="text-[10px] font-bold uppercase text-green-200/70">Keep</p>
+                <p className="mt-1 text-sm font-bold text-white">
+                  {strategyExplanation.keepPercent}% ({strategyExplanation.keepAmountText} USDCx)
+                </p>
+                <p className="mt-1 text-[11px] text-white/45">
+                  Available immediately
+                </p>
+              </div>
+            </div>
+          </section>
 
           {mode === "beginner" && (
             <div className="mb-6 pb-6 border-b border-white/5">
@@ -644,6 +816,78 @@ export function VaultDashboard() {
             </div>
           </div>
         )}
+
+        <div className="glass-card-strong p-6 rounded-[24px]">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Vault Activity</h3>
+              <p className="mt-1 text-xs text-white/45">Recent actions submitted from this session.</p>
+            </div>
+            <button
+              onClick={() => setRefreshKey((k) => k + 1)}
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              title="Refreshes wallet balance and vault state from read-only contract calls."
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            {activity.length === 0 ? (
+              <div className="rounded-xl border border-white/10 bg-[#0A0A0B] p-4 text-sm text-white/45">
+                Deposits and withdrawals will appear here after you submit them.
+              </div>
+            ) : (
+              activity.map((item) => {
+                const status = describeActivityStatus({
+                  type: item.type,
+                  lockedMicro: item.lockedMicro,
+                  unlockBlock: item.unlockBlock,
+                  currentBlock: vaultState?.currentBlock ?? null,
+                });
+
+                return (
+                  <article key={item.id} className="rounded-xl border border-white/10 bg-[#0A0A0B] p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-white">
+                          {item.type === "deposit" ? "Deposit" : "Withdrawal"} {formatMicroToUsdcx(item.amountMicro)} USDCx
+                        </p>
+                        <p className="mt-1 text-[11px] text-white/45">
+                          Locked {formatMicroToUsdcx(item.lockedMicro)} · Available {formatMicroToUsdcx(item.availableMicro)}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                          status === "locked"
+                            ? "bg-purple-500/10 text-purple-200 border border-purple-500/20"
+                            : status === "unlocked"
+                              ? "bg-green-500/10 text-green-200 border border-green-500/20"
+                              : "bg-blue-500/10 text-blue-200 border border-blue-500/20"
+                        }`}
+                      >
+                        {status}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-white/35">
+                      <span>{item.createdAt}</span>
+                      {item.txId && (
+                        <a
+                          href={getExplorerTxUrl(item.txId)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary/80 hover:text-primary"
+                        >
+                          Hiro explorer
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </div>
 
         {/* Manage Funds - Tabbed */}
         <div className="glass-card-strong p-6 md:p-8 rounded-[24px] relative overflow-hidden flex-1 flex flex-col">
