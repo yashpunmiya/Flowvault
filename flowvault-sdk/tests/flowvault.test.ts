@@ -198,6 +198,21 @@ describe("FlowVault state-changing methods (mocked)", () => {
     expect(callArgs.functionName).toBe("set-routing-rules");
   });
 
+  it("createStrategy should use the real set-routing-rules contract call", async () => {
+    const vault = makeVault();
+    const result = await vault.createStrategy({
+      lockAmount: 1000000,
+      lockUntilBlock: 200000,
+      splitAddress: SPLIT_ADDRESS,
+      splitAmount: 500000,
+    });
+
+    expect(result.status).toBe("success");
+    const callArgs = (makeContractCall as ReturnType<typeof vi.fn>).mock
+      .calls[0][0];
+    expect(callArgs.functionName).toBe("set-routing-rules");
+  });
+
   it("deposit should pass post-conditions when provided", async () => {
     const vault = makeVault();
     const postConditions = [{} as any];

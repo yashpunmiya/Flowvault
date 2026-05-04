@@ -15,6 +15,7 @@ FlowVault SDK wraps every [FlowVault smart-contract](../flowvault-contracts/cont
 - [API Reference](#api-reference)
   - [Constructor](#constructor)
   - [setRoutingRules](#setroutingrules)
+  - [createStrategy](#createstrategy)
   - [deposit](#deposit)
   - [withdraw](#withdraw)
   - [clearRoutingRules](#clearroutingrules)
@@ -68,8 +69,8 @@ const vault = new FlowVault({
   senderKey: process.env.STACKS_PRIVATE_KEY!,
 });
 
-// 2. Set routing rules
-await vault.setRoutingRules({
+// 2. Create a deposit strategy
+await vault.createStrategy({
   lockAmount: tokenToMicro("100"), // lock 100 USDCx
   lockUntilBlock: 210000,          // until block 210 000
   splitAddress: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG",
@@ -140,7 +141,7 @@ await vault.deposit(tokenToMicro("10"));
 | `postConditions`        | `array`  | No       | Default post-conditions for write calls  |
 | `postConditionMode`     | `string` | No       | `"allow"` or `"deny"` post-condition mode |
 
-\* Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `clearRoutingRules`). Read-only methods work without it.
+\* Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `createStrategy`, `clearRoutingRules`). Read-only methods work without it.
 
 If you provide `contractCallExecutor`, write methods use that executor and do not require `senderKey`.
 
@@ -222,6 +223,21 @@ await vault.setRoutingRules({
   splitAmount: tokenToMicro("0"),
 });
 ```
+
+---
+
+### createStrategy
+
+```ts
+await vault.createStrategy(
+  rules: RoutingRules,
+  options?: TransactionOptions
+): Promise<TransactionResult>
+```
+
+Product-facing alias for `setRoutingRules`. It calls the same FlowVault
+`set-routing-rules` contract function and the saved strategy is applied on the
+next `deposit()`.
 
 ---
 

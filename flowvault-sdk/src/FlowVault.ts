@@ -401,6 +401,20 @@ export class FlowVault {
   }
 
   /**
+   * Create or replace the caller's deposit strategy.
+   *
+   * This is the product-facing alias for `setRoutingRules`. It still calls the
+   * FlowVault contract's `set-routing-rules` function and the stored strategy is
+   * applied automatically on the next deposit.
+   */
+  async createStrategy(
+    rules: RoutingRules,
+    options?: TransactionOptions
+  ): Promise<TransactionResult> {
+    return this.setRoutingRules(rules, options);
+  }
+
+  /**
    * Deposit USDCx into the vault.
    *
    * Routing rules (lock / split / hold) are applied automatically at
