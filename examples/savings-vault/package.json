@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:sdk": "node ../../scripts/build-sdk.cjs",
+    "prebuild": "npm run build:sdk",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
+    "pretest": "npm run build:sdk",
     "test": "vitest run",
+    "pretypecheck": "npm run build:sdk",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
