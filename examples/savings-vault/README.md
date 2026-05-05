@@ -32,7 +32,7 @@ Optional environment overrides:
 ```bash
 NEXT_PUBLIC_FLOWVAULT_NETWORK=testnet
 NEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS=STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
-NEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME=flowvault
+NEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME=flowvault-v2
 NEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_ADDRESS=ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
 NEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_NAME=usdcx
 ```
@@ -57,7 +57,7 @@ The app initializes `FlowVault` in wallet-executor mode:
 const vault = new FlowVault({
   network: "testnet",
   contractAddress,
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress,
   tokenContractName: "usdcx",
   senderAddress,

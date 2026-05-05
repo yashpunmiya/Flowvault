@@ -1,0 +1,13 @@
+{
+  "network": "testnet",
+  "contractName": "flowvault-v2",
+  "contractId": "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2",
+  "deployerAddress": "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
+  "txid": "0x440f8015a881e7814d05823a67466439c0c3b6cdb949cf5b4165fb77ece0c256",
+  "blockHeight": 3974117,
+  "clarityVersion": 3,
+  "explorerLink": "https://explorer.hiro.so/txid/0x440f8015a881e7814d05823a67466439c0c3b6cdb949cf5b4165fb77ece0c256?chain=testnet",
+  "contractExplorerLink": "https://explorer.hiro.so/address/STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2?chain=testnet",
+  "sourceMatchesRepository": true,
+  "errConstantCount": 12
+}

@@ -65,7 +65,7 @@ export default function AiIntegrationPage() {
 
 Use these values:
 - network: testnet
-- flowvault contract: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault
+- flowvault contract: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2
 - token contract: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
 
 Implement:

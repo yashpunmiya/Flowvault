@@ -30,10 +30,10 @@ export default function SdkPage() {
       <section id="init" className="doc-section-card">
         <h2>Initialization</h2>
         <h3>Backend signer mode</h3>
-        <pre className="doc-code">{`import { FlowVault } from "flowvault-sdk";\n\nconst vault = new FlowVault({\n  network: "testnet",\n  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",\n  contractName: "flowvault",\n  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",\n  tokenContractName: "usdcx",\n  senderKey: process.env.STACKS_PRIVATE_KEY,\n});`}</pre>
+        <pre className="doc-code">{`import { FlowVault } from "flowvault-sdk";\n\nconst vault = new FlowVault({\n  network: "testnet",\n  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",\n  contractName: "flowvault-v2",\n  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",\n  tokenContractName: "usdcx",\n  senderKey: process.env.STACKS_PRIVATE_KEY,\n});`}</pre>
 
         <h3>Browser wallet mode</h3>
-        <pre className="doc-code">{`import { request } from "@stacks/connect";\nimport { FlowVault } from "flowvault-sdk";\n\nconst walletVault = new FlowVault({\n  network: "testnet",\n  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",\n  contractName: "flowvault",\n  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",\n  tokenContractName: "usdcx",\n  senderAddress: "ST...",\n  contractCallExecutor: async (call) => request("stx_callContract", {\n    contract: call.contractAddress + "." + call.contractName,\n    functionName: call.functionName,\n    functionArgs: call.functionArgs,\n    network: call.network,\n    postConditionMode: "allow",\n    postConditions: call.postConditions,\n  }),\n});`}</pre>
+        <pre className="doc-code">{`import { request } from "@stacks/connect";\nimport { FlowVault } from "flowvault-sdk";\n\nconst walletVault = new FlowVault({\n  network: "testnet",\n  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",\n  contractName: "flowvault-v2",\n  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",\n  tokenContractName: "usdcx",\n  senderAddress: "ST...",\n  contractCallExecutor: async (call) => request("stx_callContract", {\n    contract: call.contractAddress + "." + call.contractName,\n    functionName: call.functionName,\n    functionArgs: call.functionArgs,\n    network: call.network,\n    postConditionMode: "allow",\n    postConditions: call.postConditions,\n  }),\n});`}</pre>
       </section>
 
       <section id="surface" className="doc-section-card">

@@ -9,24 +9,10 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: sip-010-trait
+            contract-name: flowvault-v2
             expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
-            cost: 9670
-            path: "contracts\\sip-010-trait.clar"
-            anchor-block-only: true
-            clarity-version: 3
-        - contract-publish:
-            contract-name: flowvault
-            expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
-            cost: 92300
-            path: "contracts\\flowvault.clar"
-            anchor-block-only: true
-            clarity-version: 3
-        - contract-publish:
-            contract-name: mock-usdcx
-            expected-sender: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD
-            cost: 24980
-            path: "contracts\\mock-usdcx.clar"
+            cost: 110390
+            path: "contracts\\flowvault-v2.clar"
             anchor-block-only: true
             clarity-version: 3
       epoch: "3.3"

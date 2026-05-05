@@ -90,7 +90,7 @@ export default function ContractsPage() {
       <section id="addresses" className="doc-section-card">
         <h2>Network Addresses</h2>
         <ul>
-          <li>FlowVault testnet: <code>STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault</code></li>
+          <li>FlowVault v2 testnet: <code>STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2</code></li>
           <li>USDCx testnet: <code>ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx</code></li>
           <li>Mainnet USDCx: <code>SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx</code></li>
         </ul>

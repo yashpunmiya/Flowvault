@@ -139,7 +139,7 @@ npm test
 
 | Contract | Address |
 |----------|---------|
-| FlowVault | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault` |
+| flowvault-v2 | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2` |
 | USDCx | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` |
 
 ### Mainnet

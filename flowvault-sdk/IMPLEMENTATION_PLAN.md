@@ -3,7 +3,7 @@
 ## 1. Project Understanding
 
 ### Contract Functions (deployed on testnet)
-**Contract:** `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault`
+**Contract:** `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2`
 **USDCx:** `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx`
 
 #### Public Functions (state-changing, need signing)
@@ -143,7 +143,7 @@ Methods:
 const vault = new FlowVault({
   network: 'testnet',
   contractAddress: 'STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD',
-  contractName: 'flowvault',
+  contractName: 'flowvault-v2',
   senderKey: 'your-private-key',
   tokenContractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
   tokenContractName: 'usdcx',

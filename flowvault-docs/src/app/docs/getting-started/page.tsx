@@ -105,7 +105,7 @@ export default function GettingStartedPage() {
 
       <section id="env" className="doc-section-card">
         <h2>Environment Setup</h2>
-        <pre className="doc-code">{`NEXT_PUBLIC_FLOWVAULT_NETWORK=testnet\nNEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS=STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD\nNEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME=flowvault\nNEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_ADDRESS=ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM\nNEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_NAME=usdcx`}</pre>
+        <pre className="doc-code">{`NEXT_PUBLIC_FLOWVAULT_NETWORK=testnet\nNEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS=STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD\nNEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME=flowvault-v2\nNEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_ADDRESS=ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM\nNEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_NAME=usdcx`}</pre>
         <p>
           For mainnet migration, switch both contract principals together.
           Mixed environments are the most common source of failed transfers.
@@ -135,7 +135,7 @@ export default function GettingStartedPage() {
         </p>
         <pre className="doc-code">{`Project: FlowVault integration
 Network: testnet
-Contract: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault
+Contract: STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2
 Token: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx
 Wallet mode: @stacks/connect request("stx_callContract")
 Required flows: setRoutingRules, deposit, getVaultState, withdraw

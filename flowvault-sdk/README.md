@@ -63,7 +63,7 @@ import { FlowVault, tokenToMicro } from "flowvault-sdk";
 const vault = new FlowVault({
   network: "testnet",
   contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   tokenContractName: "usdcx",
   senderKey: process.env.STACKS_PRIVATE_KEY!,
@@ -102,7 +102,7 @@ const senderAddress = "ST...connected-wallet-address";
 const vault = new FlowVault({
   network: "testnet",
   contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   tokenContractName: "usdcx",
   senderAddress,
@@ -153,7 +153,7 @@ import { DEFAULT_CONTRACTS } from "flowvault-sdk";
 console.log(DEFAULT_CONTRACTS.testnet);
 // {
 //   contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-//   contractName: "flowvault",
+//   contractName: "flowvault-v2",
 //   tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
 //   tokenContractName: "usdcx",
 // }
@@ -417,7 +417,7 @@ import { PostConditionMode } from "@stacks/transactions";
 const vault = new FlowVault({
   network: "testnet",
   contractAddress: "...",
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress: "...",
   tokenContractName: "usdcx",
   senderKey: process.env.STACKS_PRIVATE_KEY!,

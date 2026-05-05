@@ -5,8 +5,8 @@ authors = []
 telemetry = true
 cache_dir = '.\.cache'
 requirements = []
-[contracts.flowvault]
-path = 'contracts/flowvault.clar'
+[contracts.flowvault-v2]
+path = 'contracts/flowvault-v2.clar'
 clarity_version = 3
 epoch = 'latest'
 

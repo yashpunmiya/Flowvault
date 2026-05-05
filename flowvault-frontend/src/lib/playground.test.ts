@@ -136,7 +136,7 @@ describe("input validation", () => {
 
   it("accepts valid stacks addresses", () => {
     expect(isValidStacksAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM")).toBe(true);
-    expect(isValidStacksAddress("STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault")).toBe(true);
+    expect(isValidStacksAddress("STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2")).toBe(true);
   });
 
   it("rejects invalid stacks addresses", () => {

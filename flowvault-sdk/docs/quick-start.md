@@ -106,7 +106,7 @@ If you only need to read data, you can omit `senderKey`:
 const reader = new FlowVault({
   network: "testnet",
   contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   tokenContractName: "usdcx",
 });
@@ -130,7 +130,7 @@ import { request } from "@stacks/connect";
 const walletVault = new FlowVault({
   network: "testnet",
   contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-  contractName: "flowvault",
+  contractName: "flowvault-v2",
   tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   tokenContractName: "usdcx",
   senderAddress: "ST...connected-wallet-address", // required for proper sender context

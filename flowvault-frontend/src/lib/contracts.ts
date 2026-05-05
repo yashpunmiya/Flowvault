@@ -2,7 +2,7 @@
 export const CONTRACTS = {
   // Testnet addresses
   testnet: {
-    flowvault: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault",
+    flowvault: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2",
     usdcx: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx",
   },
   // Mainnet addresses (update when deployed)

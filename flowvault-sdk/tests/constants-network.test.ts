@@ -23,7 +23,7 @@ describe("constants", () => {
     expect(DEFAULT_CONTRACTS.testnet.contractAddress).toBe(
       "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD"
     );
-    expect(DEFAULT_CONTRACTS.testnet.contractName).toBe("flowvault");
+    expect(DEFAULT_CONTRACTS.testnet.contractName).toBe("flowvault-v2");
     expect(DEFAULT_CONTRACTS.testnet.tokenContractName).toBe("usdcx");
   });
 

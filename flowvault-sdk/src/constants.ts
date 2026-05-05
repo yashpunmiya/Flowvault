@@ -19,7 +19,7 @@ export const DEFAULT_CONTRACTS: Record<
 > = {
   testnet: {
     contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-    contractName: "flowvault",
+    contractName: "flowvault-v2",
     tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
     tokenContractName: "usdcx",
   },
