@@ -2,7 +2,7 @@
 
 > TypeScript SDK for **FlowVault** — Programmable USDCx Routing on Stacks.
 
-FlowVault SDK wraps every [FlowVault smart-contract](../flowvault-contracts/contracts/flowvault.clar) function into a clean, typed TypeScript API so developers can integrate programmable stablecoin flows in minutes.
+FlowVault SDK wraps every [FlowVault smart-contract](../flowvault-contracts/contracts/flowvault-v2.clar) function into a clean, typed TypeScript API so developers can integrate programmable stablecoin flows in minutes.
 
 ---
 

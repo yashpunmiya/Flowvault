@@ -75,7 +75,7 @@ export interface FlowVaultConfig {
   /** The deployer address of the FlowVault contract. */
   contractAddress: string;
 
-  /** The name of the FlowVault contract (e.g. `"flowvault"`). */
+  /** The name of the FlowVault contract (e.g. `"flowvault-v2"`). */
   contractName: string;
 
   /**

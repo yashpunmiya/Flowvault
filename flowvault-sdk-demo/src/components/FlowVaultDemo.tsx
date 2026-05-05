@@ -44,7 +44,7 @@ export function FlowVaultDemo() {
   }, []);
 
   const flowvaultAddress = process.env.NEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS ?? "";
-  const flowvaultName = process.env.NEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME ?? "flowvault";
+  const flowvaultName = process.env.NEXT_PUBLIC_FLOWVAULT_CONTRACT_NAME ?? "flowvault-v2";
   const tokenAddress = process.env.NEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_ADDRESS ?? "";
   const tokenName = process.env.NEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_NAME ?? "usdcx";
 

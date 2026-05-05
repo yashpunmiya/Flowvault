@@ -34,7 +34,7 @@ transaction signing.
 │  Stacks Blockchain (RPC)          │
 │  ┌────────────────────────────┐   │
 │  │  FlowVault Contract        │   │
-│  │  (flowvault.clar)          │   │
+│  │  (flowvault-v2.clar)       │   │
 │  ├────────────────────────────┤   │
 │  │  USDCx Token Contract      │   │
 │  │  (SIP-010 compliant)       │   │
