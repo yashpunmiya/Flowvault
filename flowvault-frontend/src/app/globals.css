@@ -98,6 +98,160 @@
   @apply bg-gradient-to-br from-[#5546FF] to-[#9B94FF] bg-clip-text text-transparent;
 }
 
+.demo-dropdown {
+  position: relative;
+}
+
+.demo-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.demo-trigger:hover,
+.demo-dropdown:focus-within .demo-trigger {
+  border-color: rgba(255, 94, 19, 0.42);
+  background: rgba(255, 94, 19, 0.1);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.demo-trigger-icon {
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.58);
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.demo-dropdown:hover .demo-trigger-icon,
+.demo-dropdown:focus-within .demo-trigger-icon {
+  color: #ff9b6d;
+  transform: rotate(180deg);
+}
+
+.demo-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(360px, calc(100vw - 24px));
+  z-index: 80;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 10px;
+  background:
+    linear-gradient(135deg, rgba(255, 94, 19, 0.11), transparent 38%),
+    linear-gradient(180deg, rgba(24, 24, 27, 0.98), rgba(10, 10, 11, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(22px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: top right;
+  transition: opacity 170ms ease, transform 170ms ease;
+}
+
+.demo-dropdown:hover .demo-menu,
+.demo-dropdown:focus-within .demo-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.demo-menu-header {
+  display: grid;
+  gap: 2px;
+  padding: 8px 9px 10px;
+}
+
+.demo-menu-header span {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.demo-menu-header strong {
+  color: white;
+  font-size: 14px;
+}
+
+.demo-menu-list {
+  display: grid;
+  gap: 7px;
+}
+
+.demo-menu-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.demo-menu-item:hover {
+  border-color: rgba(255, 94, 19, 0.32);
+  background: rgba(255, 255, 255, 0.075);
+  transform: translateX(2px);
+}
+
+.demo-menu-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(255, 94, 19, 0.18);
+}
+
+.demo-menu-mark-flowpay {
+  background: linear-gradient(135deg, #ff5e13, #ff9b6d);
+}
+
+.demo-menu-mark-savings {
+  background: linear-gradient(135deg, #00d67d, #68f5b1);
+}
+
+.demo-menu-item strong,
+.demo-menu-item small {
+  display: block;
+}
+
+.demo-menu-item strong {
+  color: white;
+  font-size: 14px;
+}
+
+.demo-menu-item small {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.demo-menu-arrow {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.demo-menu-item:hover .demo-menu-arrow {
+  color: #ff9b6d;
+  transform: translate(1px, -1px);
+}
+
 /* Base Styles */
 body {
   background: var(--color-background);
@@ -126,4 +280,16 @@ body {
 
 .input-field {
   @apply w-full bg-[#0A0A0B] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 focus:outline-none transition-all duration-200 font-mono;
+}
+
+@media (max-width: 720px) {
+  .demo-trigger {
+    min-height: 40px;
+    padding: 0 11px;
+    font-size: 13px;
+  }
+
+  .demo-menu {
+    right: -92px;
+  }
 }

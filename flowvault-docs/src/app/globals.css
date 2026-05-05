@@ -288,6 +288,90 @@ a {
   color: #166534;
 }
 
+.reference-app-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.reference-app-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 8px;
+  min-height: 218px;
+  border: 1px solid #bde7df;
+  border-radius: 14px;
+  padding: 18px;
+  background: linear-gradient(145deg, #f8fffc, #ffffff);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.reference-app-card::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  top: -28px;
+  width: 104px;
+  height: 104px;
+  border-radius: 999px;
+  opacity: 0.22;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.reference-app-card:hover {
+  border-color: #5eead4;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.reference-app-card:hover::after {
+  opacity: 0.34;
+  transform: scale(1.08);
+}
+
+.reference-app-savings::after {
+  background: #14b8a6;
+}
+
+.reference-app-flowpay::after {
+  background: #f59e0b;
+}
+
+.reference-app-kicker {
+  width: fit-content;
+  border: 1px solid #bde7df;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: #ecfeff;
+  color: #0f5e58;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.reference-app-card strong {
+  color: #13222d;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.reference-app-card p {
+  margin: 0;
+  color: #254151;
+  line-height: 1.65;
+}
+
+.reference-app-card small {
+  align-self: end;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .doc-kbd {
   border: 1px solid #a3b8c3;
   background: #f8fafc;
@@ -409,5 +493,9 @@ th {
 
   .doc-section-card h2 {
     font-size: 22px;
+  }
+
+  .reference-app-grid {
+    grid-template-columns: 1fr;
   }
 }

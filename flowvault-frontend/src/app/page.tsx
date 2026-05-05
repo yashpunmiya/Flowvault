@@ -2,6 +2,7 @@
 
 import { WalletConnect } from "@/components/WalletConnect";
 import { VaultDashboard } from "@/components/VaultDashboard";
+import { DemoAppsDropdown } from "@/components/DemoAppsDropdown";
 
 export default function Home() {
   return (
@@ -30,7 +31,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <WalletConnect />
+          <div className="flex items-center gap-3">
+            <DemoAppsDropdown />
+            <WalletConnect />
+          </div>
         </div>
       </header>
 
