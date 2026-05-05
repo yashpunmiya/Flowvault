@@ -51,7 +51,6 @@ export function DemoAppsDropdown() {
               role="menuitem"
               target="_blank"
             >
-              <span className={`demo-menu-mark ${app.markerClass}`} />
               <span>
                 <strong>{app.name}</strong>
                 <small>{app.description}</small>
