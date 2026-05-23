@@ -1,8 +1,8 @@
 "use client";
 
-import { WalletConnect } from "@/components/WalletConnect";
+import Image from "next/image";
 import { VaultDashboard } from "@/components/VaultDashboard";
-import { DemoAppsDropdown } from "@/components/DemoAppsDropdown";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export default function Home() {
   return (
@@ -12,31 +12,7 @@ export default function Home() {
       <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[120px] -z-10" />
       <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-[80px] -z-10" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass-panel border-b-0 border-white/5 bg-background/50 backdrop-blur-xl">
-        <div className="w-full max-w-[1800px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4 group cursor-pointer">
-            <div className="w-12 h-12 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300">
-              <img
-                src="/logo.png"
-                alt="FlowVault logo"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">FlowVault</h1>
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00D67D]"></span>
-                <p className="text-xs text-white/50 font-medium">Stacks Testnet</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <DemoAppsDropdown />
-            <WalletConnect />
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section - Two-column for wide screens */}
       <section className="pt-10 pb-8 px-6 relative">
@@ -74,9 +50,12 @@ export default function Home() {
 
             {/* Right: Hero image */}
             <div className="flex justify-center md:justify-end">
-              <img
+              <Image
                 src="/hero_image.png"
                 alt="FlowVault routing visualization"
+                width={520}
+                height={347}
+                priority
                 className="w-[260px] sm:w-[320px] md:w-[420px] lg:w-[520px] object-contain drop-shadow-[0_0_40px_rgba(255,94,19,0.28)] animate-float"
               />
             </div>
