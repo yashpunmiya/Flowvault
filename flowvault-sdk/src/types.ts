@@ -72,11 +72,11 @@ export interface FlowVaultConfig {
   /** The Stacks network to interact with. */
   network: NetworkName;
 
-  /** The deployer address of the FlowVault contract. */
-  contractAddress: string;
+  /** The deployer address of the FlowVault contract. Defaults to the known v2 deployment for the selected network when available. */
+  contractAddress?: string;
 
-  /** The name of the FlowVault contract (e.g. `"flowvault-v2"`). */
-  contractName: string;
+  /** The name of the FlowVault contract. Defaults to `"flowvault-v2"`. */
+  contractName?: string;
 
   /**
    * Private key used for signing transactions.
@@ -84,11 +84,11 @@ export interface FlowVaultConfig {
    */
   senderKey?: string;
 
-  /** The deployer address of the USDCx token contract. */
-  tokenContractAddress: string;
+  /** The deployer address of the USDCx token contract. Defaults to the known deployment for the selected network when available. */
+  tokenContractAddress?: string;
 
-  /** The name of the USDCx token contract (e.g. `"usdcx"`). */
-  tokenContractName: string;
+  /** The name of the USDCx token contract. Defaults to `"usdcx"`. */
+  tokenContractName?: string;
 
   /** Optional default post-conditions for state-changing calls. */
   postConditions?: PostCondition[];

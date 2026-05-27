@@ -7,7 +7,7 @@ export const CONTRACTS = {
   },
   // Mainnet addresses (update when deployed)
   mainnet: {
-    flowvault: "SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.flowvault",
+    flowvault: "SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.flowvault-v2",
     usdcx: "SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx",
   },
 } as const;

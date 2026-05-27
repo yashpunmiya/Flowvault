@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { createFlowVaultSdk } from "@/lib/flowvault";
-import { createStrategy, buildDepositPostConditions } from "@/lib/flowpay-flow";
+import {
+  buildDepositPostConditions,
+  createStrategy,
+  waitForTransactionSuccess,
+} from "@/lib/flowpay-flow";
 import {
   buildFlowPaySuccessState,
   validateFlowPayInputs,
@@ -10,7 +14,7 @@ import {
   type FlowPaySuccessState,
 } from "@/lib/flowpay-strategy";
 
-type DepositStep = "idle" | "strategy" | "deposit";
+type DepositStep = "idle" | "strategy" | "confirming" | "deposit";
 
 export function useFlowPay(walletAddress: string | null) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,13 +58,15 @@ export function useFlowPay(walletAddress: string | null) {
         },
       });
 
+      setStep("confirming");
+      await waitForTransactionSuccess(created.txId);
+
       setStep("deposit");
       const depositTransaction = await sdk.deposit(created.strategy.depositMicro, {
         postConditionMode: "deny",
         postConditions: buildDepositPostConditions({
           walletAddress,
           depositMicro: created.strategy.depositMicro,
-          sentMicro: created.strategy.sentMicro,
         }),
       });
 

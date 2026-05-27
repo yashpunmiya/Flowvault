@@ -20,7 +20,7 @@ function makeConfig(overrides: Record<string, unknown> = {}) {
   return {
     network: "testnet" as const,
     contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-    contractName: "flowvault",
+    contractName: "flowvault-v2",
     tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
     tokenContractName: "usdcx",
     ...overrides,
@@ -34,6 +34,11 @@ function makeConfig(overrides: Record<string, unknown> = {}) {
 describe("FlowVault constructor", () => {
   it("should create an instance with valid config", () => {
     const vault = new FlowVault(makeConfig());
+    expect(vault).toBeInstanceOf(FlowVault);
+  });
+
+  it("should use v2 testnet defaults when contract fields are omitted", () => {
+    const vault = new FlowVault({ network: "testnet" });
     expect(vault).toBeInstanceOf(FlowVault);
   });
 

@@ -1,4 +1,13 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlowVault Frontend
+
+Next.js frontend for the FlowVault v2 testnet deployment.
+
+## Contract Configuration
+
+| Network | FlowVault Contract | USDCx Contract |
+| ------- | ------------------ | -------------- |
+| testnet | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2` | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` |
+| mainnet | Not deployed | `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx` |
 
 ## Getting Started
 

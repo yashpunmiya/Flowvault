@@ -59,13 +59,9 @@ The SDK depends on `@stacks/transactions` and `@stacks/network` (peer-level — 
 ```ts
 import { FlowVault, tokenToMicro } from "flowvault-sdk";
 
-// 1. Initialise
+// 1. Initialise with default testnet v2 contracts
 const vault = new FlowVault({
   network: "testnet",
-  contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-  contractName: "flowvault-v2",
-  tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
-  tokenContractName: "usdcx",
   senderKey: process.env.STACKS_PRIVATE_KEY!,
 });
 
@@ -131,21 +127,28 @@ await vault.deposit(tokenToMicro("10"));
 | Parameter               | Type     | Required | Description                              |
 | ----------------------- | -------- | -------- | ---------------------------------------- |
 | `network`               | `string` | Yes      | `"testnet"` or `"mainnet"`               |
-| `contractAddress`       | `string` | Yes      | FlowVault deployer address               |
-| `contractName`          | `string` | Yes      | FlowVault contract name                  |
-| `tokenContractAddress`  | `string` | Yes      | USDCx token deployer address             |
-| `tokenContractName`     | `string` | Yes      | USDCx token contract name                |
-| `senderKey`             | `string` | No*      | Private key for signing transactions     |
+| `contractAddress`       | `string` | No†      | FlowVault deployer address               |
+| `contractName`          | `string` | No†      | FlowVault contract name                  |
+| `tokenContractAddress`  | `string` | No†      | USDCx token deployer address             |
+| `tokenContractName`     | `string` | No†      | USDCx token contract name                |
+| `senderKey`             | `string` | No‡      | Private key for signing transactions     |
 | `senderAddress`         | `string` | No       | Sender address for wallet-executor mode  |
 | `contractCallExecutor`  | `func`   | No       | Custom write executor (wallet signing)   |
 | `postConditions`        | `array`  | No       | Default post-conditions for write calls  |
 | `postConditionMode`     | `string` | No       | `"allow"` or `"deny"` post-condition mode |
 
-\* Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `createStrategy`, `clearRoutingRules`). Read-only methods work without it.
+† Contract fields default to the known v2 testnet deployment. Mainnet still requires explicit addresses until a v2 mainnet deployment is published.
+
+‡ Required for state-changing methods (`deposit`, `withdraw`, `setRoutingRules`, `createStrategy`, `clearRoutingRules`). Read-only methods work without it.
 
 If you provide `contractCallExecutor`, write methods use that executor and do not require `senderKey`.
 
 ### Default Testnet Addresses
+
+| Network | FlowVault Contract | USDCx Contract |
+| ------- | ------------------ | -------------- |
+| testnet | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2` | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` |
+| mainnet | Not deployed | `usdcx` name only; provide the deployer address explicitly |
 
 ```ts
 import { DEFAULT_CONTRACTS } from "flowvault-sdk";
@@ -487,6 +490,7 @@ Follows [Semantic Versioning](https://semver.org/):
 | Version | Meaning                        |
 | ------- | ------------------------------ |
 | `0.1.0` | Initial public SDK             |
+| `0.1.2` | Default testnet contract targets FlowVault v2 |
 | `0.2.0` | Feature additions              |
 | `1.0.0` | Stable, production-ready API   |
 

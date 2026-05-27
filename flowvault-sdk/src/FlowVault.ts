@@ -39,7 +39,7 @@ import {
   NetworkError,
 } from "./errors";
 
-import { errorMessageFromCode } from "./constants";
+import { DEFAULT_CONTRACTS, errorMessageFromCode } from "./constants";
 import { resolveNetwork } from "./network";
 import {
   assertValidAddress,
@@ -119,33 +119,42 @@ export class FlowVault {
    * the network value is invalid.
    */
   constructor(config: FlowVaultConfig) {
+    const network = resolveNetwork(config.network);
+    const defaults = DEFAULT_CONTRACTS[network];
+    const contractAddress = config.contractAddress ?? defaults.contractAddress;
+    const contractName = config.contractName ?? defaults.contractName;
+    const tokenContractAddress =
+      config.tokenContractAddress ?? defaults.tokenContractAddress;
+    const tokenContractName =
+      config.tokenContractName ?? defaults.tokenContractName;
+
     // Validate required fields
-    if (!config.contractAddress) {
+    if (!contractAddress) {
       throw new InvalidConfigurationError("contractAddress is required.");
     }
-    if (!config.contractName) {
+    if (!contractName) {
       throw new InvalidConfigurationError("contractName is required.");
     }
-    if (!config.tokenContractAddress) {
+    if (!tokenContractAddress) {
       throw new InvalidConfigurationError("tokenContractAddress is required.");
     }
-    if (!config.tokenContractName) {
+    if (!tokenContractName) {
       throw new InvalidConfigurationError("tokenContractName is required.");
     }
 
-    assertValidAddress(config.contractAddress);
-    assertValidAddress(config.tokenContractAddress);
-    assertValidContractName(config.contractName, "contractName");
-    assertValidContractName(config.tokenContractName, "tokenContractName");
+    assertValidAddress(contractAddress);
+    assertValidAddress(tokenContractAddress);
+    assertValidContractName(contractName, "contractName");
+    assertValidContractName(tokenContractName, "tokenContractName");
     if (config.senderAddress) {
       assertValidAddress(config.senderAddress);
     }
 
-    this.network = resolveNetwork(config.network);
-    this.contractAddress = config.contractAddress;
-    this.contractName = config.contractName;
-    this.tokenContractAddress = config.tokenContractAddress;
-    this.tokenContractName = config.tokenContractName;
+    this.network = network;
+    this.contractAddress = contractAddress;
+    this.contractName = contractName;
+    this.tokenContractAddress = tokenContractAddress;
+    this.tokenContractName = tokenContractName;
     this.senderKey = config.senderKey;
     this.senderAddress = config.senderAddress;
     this.postConditions = config.postConditions;

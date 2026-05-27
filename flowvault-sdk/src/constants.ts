@@ -25,7 +25,7 @@ export const DEFAULT_CONTRACTS: Record<
   },
   mainnet: {
     contractAddress: "",
-    contractName: "flowvault",
+    contractName: "flowvault-v2",
     tokenContractAddress: "",
     tokenContractName: "usdcx",
   },

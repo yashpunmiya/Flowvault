@@ -48,7 +48,7 @@ function makeVault() {
   return new FlowVault({
     network: "testnet",
     contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-    contractName: "flowvault",
+    contractName: "flowvault-v2",
     tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
     tokenContractName: "usdcx",
     senderKey:
@@ -60,7 +60,7 @@ function makeWalletVault(executor: ReturnType<typeof vi.fn>) {
   return new FlowVault({
     network: "testnet",
     contractAddress: "STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD",
-    contractName: "flowvault",
+    contractName: "flowvault-v2",
     tokenContractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
     tokenContractName: "usdcx",
     senderAddress: VALID_ADDRESS,

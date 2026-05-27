@@ -7,6 +7,11 @@ function readNetwork(): NetworkName {
 
 export const FLOWVAULT_NETWORK = readNetwork();
 
+export const FLOWVAULT_API_BASE =
+  FLOWVAULT_NETWORK === "mainnet"
+    ? "https://api.hiro.so"
+    : "https://api.testnet.hiro.so";
+
 export const FLOWVAULT_CONTRACTS = {
   contractAddress:
     process.env.NEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS ??
@@ -21,6 +26,9 @@ export const FLOWVAULT_CONTRACTS = {
     process.env.NEXT_PUBLIC_FLOWVAULT_TOKEN_CONTRACT_NAME ??
     DEFAULT_CONTRACTS[FLOWVAULT_NETWORK].tokenContractName,
 };
+
+export const FLOWVAULT_TOKEN_ASSET_NAME =
+  process.env.NEXT_PUBLIC_FLOWVAULT_TOKEN_ASSET_NAME ?? "usdcx-token";
 
 export function getHiroTxUrl(txId: string): string {
   const normalized = txId.startsWith("0x") ? txId : `0x${txId}`;

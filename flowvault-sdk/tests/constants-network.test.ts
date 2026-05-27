@@ -27,6 +27,10 @@ describe("constants", () => {
     expect(DEFAULT_CONTRACTS.testnet.tokenContractName).toBe("usdcx");
   });
 
+  it("DEFAULT_CONTRACTS should point mainnet contract name at v2", () => {
+    expect(DEFAULT_CONTRACTS.mainnet.contractName).toBe("flowvault-v2");
+  });
+
   it("errorMessageFromCode should resolve known codes", () => {
     expect(errorMessageFromCode(1001)).toContain("Invalid amount");
     expect(errorMessageFromCode(1003)).toContain("locked");

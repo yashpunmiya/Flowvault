@@ -20,7 +20,7 @@ flowvault/
 ├── flowvault-contracts/     # Clarity smart contracts
 │   ├── contracts/
 │   │   ├── sip-010-trait.clar   # SIP-010 token standard trait
-│   │   ├── flowvault.clar       # Main vault contract
+│   │   ├── flowvault-v2.clar    # Main vault contract
 │   │   └── mock-usdcx.clar      # Mock USDCx for local testing only
 │   └── tests/
 │       ├── flowvault.test.ts    # Vault contract tests
@@ -139,13 +139,14 @@ npm test
 
 | Contract | Address |
 |----------|---------|
-| flowvault-v2 | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2` |
+| FlowVault v2 | `STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2` |
 | USDCx | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx` |
 
 ### Mainnet
 
 | Contract | Address |
 |----------|---------|
+| FlowVault v2 | Not deployed |
 | USDCx | `SP120SBRBQJ00MCWS7TM5R8WJNTTKD5K0HFRC2CNE.usdcx` |
 
 ## 💡 Use Cases

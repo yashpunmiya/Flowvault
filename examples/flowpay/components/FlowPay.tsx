@@ -94,9 +94,11 @@ export function FlowPay() {
   const pendingMessage =
     flowPay.step === "strategy"
       ? "Confirm strategy in your wallet."
-      : flowPay.step === "deposit"
-        ? "Confirm the USDCx deposit in your wallet."
-        : null;
+      : flowPay.step === "confirming"
+        ? "Waiting for the strategy transaction to confirm."
+        : flowPay.step === "deposit"
+          ? "Confirm the USDCx deposit in your wallet."
+          : null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -242,6 +244,7 @@ export function FlowPay() {
 
             <div className="run-state">
               <div className={flowPay.step === "strategy" ? "step active" : "step"}>Strategy</div>
+              <div className={flowPay.step === "confirming" ? "step active" : "step"}>Confirm</div>
               <div className={flowPay.step === "deposit" ? "step active" : "step"}>Deposit</div>
               <div className={flowPay.success ? "step active" : "step"}>Done</div>
               <span>{LOCK_DURATION_BLOCKS} block lock</span>

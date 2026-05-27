@@ -6,6 +6,7 @@ const deployer = accounts.get("deployer")!;
 const wallet1 = accounts.get("wallet_1")!;
 const wallet2 = accounts.get("wallet_2")!;
 const wallet3 = accounts.get("wallet_3")!;
+const flowvaultContract = "flowvault-v2";
 
 // Helper to mint tokens to a wallet
 function mintTokens(recipient: string, amount: number) {
@@ -26,7 +27,7 @@ function setRoutingRules(
   splitAmount: number
 ) {
   return simnet.callPublicFn(
-    "flowvault",
+    flowvaultContract,
     "set-routing-rules",
     [
       Cl.uint(lockAmount),
@@ -41,7 +42,7 @@ function setRoutingRules(
 // Helper to deposit tokens
 function deposit(sender: string, amount: number) {
   return simnet.callPublicFn(
-    "flowvault",
+    flowvaultContract,
     "deposit",
     [Cl.contractPrincipal(deployer, "mock-usdcx"), Cl.uint(amount)],
     sender
@@ -51,7 +52,7 @@ function deposit(sender: string, amount: number) {
 // Helper to withdraw tokens
 function withdraw(sender: string, amount: number) {
   return simnet.callPublicFn(
-    "flowvault",
+    flowvaultContract,
     "withdraw",
     [Cl.contractPrincipal(deployer, "mock-usdcx"), Cl.uint(amount)],
     sender
@@ -61,7 +62,7 @@ function withdraw(sender: string, amount: number) {
 // Helper to get vault state
 function getVaultState(user: string) {
   return simnet.callReadOnlyFn(
-    "flowvault",
+    flowvaultContract,
     "get-vault-state",
     [Cl.principal(user)],
     deployer
@@ -304,7 +305,7 @@ describe("FlowVault Contract Tests", () => {
 
     it("get-current-block-height returns current block", () => {
       const { result } = simnet.callReadOnlyFn(
-        "flowvault",
+        flowvaultContract,
         "get-current-block-height",
         [],
         wallet1
@@ -321,7 +322,7 @@ describe("FlowVault Contract Tests", () => {
 
       // Clear rules
       const { result } = simnet.callPublicFn(
-        "flowvault",
+        flowvaultContract,
         "clear-routing-rules",
         [],
         wallet1
@@ -330,7 +331,7 @@ describe("FlowVault Contract Tests", () => {
 
       // Verify rules are cleared
       const rulesResult = simnet.callReadOnlyFn(
-        "flowvault",
+        flowvaultContract,
         "get-routing-rules",
         [Cl.principal(wallet1)],
         wallet1
@@ -347,16 +348,16 @@ describe("FlowVault Contract Tests", () => {
       expect(result).toBeErr(Cl.uint(1011)); // ERR-SPLIT-TO-SELF
     });
 
-    it("prevents lock amount exceeding hold amount", () => {
+    it("rejects lock plus split amounts that exceed the deposit", () => {
       mintTokens(wallet1, 1000000);
       
       const futureBlock = simnet.blockHeight + 100;
       // Set lock=600k, split=500k, but depositing only 1M
-      // Hold would be 500k, but lock is 600k - should fail
+      // Total routed amount is 1.1M, so v2 rejects it before hold validation.
       setRoutingRules(wallet1, 600000, futureBlock, wallet2, 500000);
       
       const { result } = deposit(wallet1, 1000000);
-      expect(result).toBeErr(Cl.uint(1010)); // ERR-LOCK-EXCEEDS-HOLD
+      expect(result).toBeErr(Cl.uint(1004)); // ERR-ROUTING-EXCEEDS-DEPOSIT
     });
 
     it("prevents reducing lock block on subsequent deposits", () => {
