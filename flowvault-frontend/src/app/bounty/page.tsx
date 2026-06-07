@@ -21,17 +21,18 @@ const tracks = [
 ];
 
 const prizes = [
-  ["2", "Second Place", "$2,000", "silver"],
-  ["1", "First Place", "$4,000", "gold"],
-  ["3", "Third Place", "$1,000", "violet"]
+  ["1", "First Place", "$350", "gold"],
+  ["2", "Second Place", "$200", "silver"],
+  ["3", "Third Place", "$150", "violet"],
+  ["gift", "Builder Contribution Awards", "$300", "purple"]
 ];
 
 const timeline = [
-  ["rocket", "Bounty Launch", "May 24, 2025"],
-  ["code", "Build Period Starts", "May 24, 2025"],
-  ["chat", "Midpoint Check-in", "June 14, 2025"],
-  ["send", "Submission Deadline", "June 28, 2025"],
-  ["trophy", "Winners Announced", "July 5, 2025"]
+  ["rocket", "Registration & Builder Onboarding", "June 1 – June 5, 2026"],
+  ["code", "Build Period", "June 6 – June 15, 2026"],
+  ["send", "Submission Deadline", "June 15, 2026 (23:59 UTC)"],
+  ["chat", "Judging Period", "June 16 – June 18, 2026"],
+  ["trophy", "Winner Announcement", "June 19, 2026"]
 ];
 
 const resources = [
@@ -143,7 +144,13 @@ function Icon({ name }: { name: string }) {
     contract: <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />,
     example: <path d="M7 7h10v10H7zM4 4h5M15 4h5M4 15v5M20 15v5" />,
     demo: <path d="M4 7h16v10H4zM8 11h4M16 11h.01M18 11h.01" />,
-    help: <path d="M12 18h.01M9.5 9a2.8 2.8 0 1 1 4.3 2.4c-1 .7-1.8 1.2-1.8 2.6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+    help: <path d="M12 18h.01M9.5 9a2.8 2.8 0 1 1 4.3 2.4c-1 .7-1.8 1.2-1.8 2.6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />,
+    gift: (
+      <>
+        <path d="M12 2L8 6H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-4l-4-4z" />
+        <path d="M12 2v13M9 11h6" />
+      </>
+    )
   };
 
   return <svg {...common}>{paths[name]}</svg>;
