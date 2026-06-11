@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -70,44 +70,44 @@ const integrationRequirements = [
 ];
 
 const resources = [
-  ["doc", "docs.flow-vault.dev", "Developer documentation and guides."],
-  ["sdk", "flowvault-sdk", "TypeScript SDK for integration."],
-  ["contract", "flowvault-v2", "Production-ready FlowVault contracts."],
-  ["demo", "Demo Apps", "Savings Vault, FlowPay reference implementations."],
-  ["code", "GitHub", "Source code repository."],
-  ["chat", "Support", "Telegram, Email. Builder support and questions."]
+  ["doc", "Documentation", "FlowVault guides, integration tutorials, and API reference.", "https://docs.flow-vault.dev"],
+  ["sdk", "TypeScript SDK", "Official flowvault-sdk package on the NPM registry.", "https://www.npmjs.com/package/flowvault-sdk"],
+  ["contract", "Clarity Contracts", "Clarity smart contracts and unit test suites on GitHub.", "https://github.com/yashpunmiya/Flowvault/tree/main/flowvault-contracts"],
+  ["code", "Reference Examples", "Next.js reference app showcasing FlowVault SDK integration.", "https://github.com/yashpunmiya/Flowvault/tree/main/flowvault-sdk-demo"],
+  ["demo", "Live Demo App", "Try the fully deployed FlowVault reference implementation.", "https://flowvaultx.vercel.app"],
+  ["help", "Support & Issues", "Submit bugs, request features, or ask integration questions.", "https://github.com/yashpunmiya/Flowvault/issues"]
 ];
 
 const prizes = [
-  ["1", "First Place", "", "gold", "Most innovative and complete FlowVault integration."],
-  ["2", "Second Place", "", "silver", "Strong execution and ecosystem value."],
-  ["3", "Third Place", "", "violet", "Promising concept with solid implementation."],
-  ["gift", "Builder Contribution Awards", "", "purple", "May be distributed across multiple builders for SDK improvements, docs, feedback, etc."]
+  ["1", "First Place", "350", "gold", "Most innovative and complete FlowVault integration."],
+  ["2", "Second Place", "200", "silver", "Strong execution and ecosystem value."],
+  ["3", "Third Place", "150", "violet", "Promising concept with solid implementation."],
+  ["gift", "Builder Awards", "300", "purple", "Distributed across multiple builders for SDK improvements, docs, feedback, etc."]
 ];
 
 const judgingCriteria = [
-  { title: "Innovation & Financial Behavior Design", weight: "35%", desc: "How novel is the financial behavior being created?" },
-  { title: "FlowVault Integration Depth", weight: "30%", desc: "How deeply does the project use FlowVault primitives?" },
-  { title: "Technical Execution", weight: "20%", desc: "Code quality, implementation quality, reliability, and UX." },
-  { title: "Ecosystem Value", weight: "15%", desc: "Can this project provide value to the broader Stacks ecosystem?" }
+  { title: "Innovation & Design", weight: "35%", desc: "How novel and impactful is the financial behavior being created?" },
+  { title: "FlowVault Integration", weight: "30%", desc: "How deeply does the project utilize FlowVault's programmable primitives?" },
+  { title: "Technical Execution", weight: "20%", desc: "Code quality, implementation standards, reliability, and visual UX." },
+  { title: "Ecosystem Value", weight: "15%", desc: "The potential of the project to add long-term value to the Stacks community." }
 ];
 
 const timeline = [
-  ["rocket", "Registration & Builder Onboarding", "June 12 – June 18, 2026"],
-  ["code", "Build Period", "June 19 – June 25, 2026"],
-  ["send", "Submission Deadline", "June 25, 2026 (23:59 UTC)"],
-  ["chat", "Judging Period", "June 26 – June 27, 2026"],
-  ["trophy", "Winner Announcement", "June 28, 2026"]
+  ["rocket", "Onboarding", "June 12 – June 18"],
+  ["code", "Build Period", "June 19 – June 25"],
+  ["send", "Submission", "June 25 (23:59 UTC)"],
+  ["chat", "Judging", "June 26 – June 27"],
+  ["trophy", "Winners", "June 28, 2026"]
 ];
 
 const faqs = [
-  { q: "Can I build solo?", a: "Yes." },
-  { q: "Can teams participate?", a: "Yes." },
-  { q: "Can I use AI tools?", a: "Yes." },
-  { q: "Must I deploy on mainnet?", a: "No. Testnet deployments are accepted." },
-  { q: "Can I build something not listed in the examples?", a: "Yes. Original ideas are encouraged." },
-  { q: "Do I need to use FlowVault?", a: "Yes. FlowVault integration is required." },
-  { q: "Can I combine multiple FlowVault primitives?", a: "Yes. Combining multiple primitives is encouraged." }
+  { q: "Can I build solo?", a: "Yes. Both individual developers and teams are fully eligible to participate." },
+  { q: "Can teams participate?", a: "Yes. You can form teams and collaborate. Prizes will be sent to the registered team wallet." },
+  { q: "Can I use AI tools?", a: "Yes. We encourage using AI tools for productivity, but your logic and integration must be original and functional." },
+  { q: "Must I deploy on mainnet?", a: "No. Stacks Testnet deployments are fully accepted and evaluated equally." },
+  { q: "Can I build something not listed in the examples?", a: "Yes. We highly encourage original concepts outside the provided list." },
+  { q: "Do I need to integrate FlowVault?", a: "Yes. Integrating one or more of FlowVault's smart contract primitives or TypeScript SDK is a strict requirement." },
+  { q: "Can I combine multiple FlowVault primitives?", a: "Yes. Projects that combine locks, splits, and custom routing will receive high integration depth scores." }
 ];
 
 function Icon({ name }: { name: string }) {
@@ -223,9 +223,13 @@ function Icon({ name }: { name: string }) {
 
 function BountyButton({ children, variant = "primary", href = "#register" }: { children: ReactNode; variant?: "primary" | "dark" | "outline"; href?: string }) {
   return (
-    <a className={ounty-button bounty-button-${variant}} href={href}>
-      {children}
-      {variant !== "outline" && <span>{"->"}</span>}
+    <a className={`bounty-button bounty-button-${variant} group`} href={href}>
+      <span>{children}</span>
+      {variant !== "outline" && (
+        <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      )}
     </a>
   );
 }
@@ -241,33 +245,47 @@ function StacksMark() {
 
 export default function BountyPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
+      
+      {/* STICKY SUB-NAVBAR */}
+      <nav className="bounty-sub-nav">
+        <div className="bounty-sub-nav-inner">
+          <a href="#bounty-why-section">Overview</a>
+          <a href="#what-to-build">Tracks</a>
+          <a href="#requirements">Requirements</a>
+          <a href="#judging">Judging</a>
+          <a href="#prizes">Prizes</a>
+          <a href="#timeline">Timeline</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </nav>
+
       <main className="bounty-page">
         {/* SECTION 1 - HERO */}
         <section className="bounty-hero" id="bounty">
           <div className="bounty-hero-copy bounty-reveal">
             <div className="bounty-eyebrow">FlowVault Builder Bounty</div>
-            <h2>
+            <h2 className="bounty-hero-title">
               Programmable
               <br />
               Money Flows
               <br />
-              on <span>Stacks</span>
+              on <span className="bounty-accent-text">Stacks</span>
             </h2>
-            <p className="bounty-hero-sub" style={{ fontSize: '1.25rem', lineHeight: '1.6', marginTop: '1rem' }}>
+            <p className="bounty-hero-sub">
               Build applications that create new financial behaviors using FlowVault&apos;s programmable routing primitives.
-              <br/><br/>
               Use locks, splits, treasury routing, payroll automation, reserve systems, creator payouts, and entirely new programmable money flows.
             </p>
-            <div className="bounty-hero-actions" style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-              <BountyButton>Register for Bounty</BountyButton>
+            <div className="bounty-hero-actions">
+              <BountyButton href="#register">Register for Bounty</BountyButton>
               <BountyButton variant="outline" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
             </div>
             
-            <div style={{ marginTop: '2rem', display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="bounty-hero-badges">
               <div className="bounty-prize-pool-badge">
-                <strong>Prize Pool:</strong> ,000 USDCx
+                <span className="badge-dot animate-pulse"></span>
+                <strong>Prize Pool:</strong> 1,000 USDT
               </div>
               <div className="bounty-built-on">
                 <small>Built on</small>
@@ -278,38 +296,68 @@ export default function BountyPage() {
 
           <div className="bounty-hero-art bounty-reveal">
             <div className="bounty-grid-plane" />
-            <Image
-              className="bounty-hero-image"
-              src="/hero_image.png"
-              alt="FlowVault programmable money flow illustration"
-              width={900}
-              height={600}
-              priority
-            />
-            <div className="bounty-float-card bounty-lock-card">
-              <strong>Lock</strong>
-              <span>Unlocks in 30 Days</span>
-            </div>
-            <div className="bounty-float-card bounty-split-card">
-              <strong>Split</strong>
-              <span>40% Team<br />60% Treasury</span>
-            </div>
-            <div className="bounty-float-card bounty-route-card">
-              <strong>Route</strong>
-              <span>Auto-distribute on Deposit</span>
+            <div className="bounty-hero-image-wrapper">
+              <Image
+                className="bounty-hero-image"
+                src="/hero_image.png"
+                alt="FlowVault programmable money flow illustration"
+                width={900}
+                height={600}
+                priority
+              />
+              <div className="bounty-float-card bounty-lock-card">
+                <div className="card-badge"><Icon name="lock" /></div>
+                <strong>Lock</strong>
+                <span>Unlocks in 30 Days</span>
+              </div>
+              <div className="bounty-float-card bounty-split-card">
+                <div className="card-badge"><Icon name="split" /></div>
+                <strong>Split</strong>
+                <span>40% Team<br />60% Treasury</span>
+              </div>
+              <div className="bounty-float-card bounty-route-card">
+                <div className="card-badge"><Icon name="route" /></div>
+                <strong>Route</strong>
+                <span>Auto-distribute on Deposit</span>
+              </div>
             </div>
           </div>
         </section>
 
         {/* SECTION 2 - WHY FLOWVAULT */}
-        <section className="bounty-why-section" style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="bounty-section-copy" style={{ maxWidth: '800px' }}>
-            <h2>Why FlowVault?</h2>
-            <div style={{ fontSize: '1.25rem', lineHeight: '1.6', color: 'var(--text-muted)', marginTop: '2rem' }}>
-              <p style={{ marginBottom: '1.5rem' }}>Most financial applications only move money.</p>
-              <p style={{ marginBottom: '1.5rem', color: 'var(--foreground)' }}><strong>FlowVault enables developers to define how money behaves after deposit.</strong></p>
-              <p style={{ marginBottom: '1.5rem' }}>Builders can combine time-locks, routing rules, treasury allocations, automated payouts, reserve systems, and programmable asset flows to create entirely new financial products on Stacks.</p>
-              <p>The purpose of this bounty is to explore and validate these new financial behaviors through real applications.</p>
+        <section className="bounty-why-section" id="bounty-why-section">
+          <div className="bounty-why-container">
+            <div className="bounty-section-header">
+              <span className="bounty-section-tag">Overview</span>
+              <h2>Why FlowVault?</h2>
+            </div>
+            <div className="bounty-why-content">
+              <div className="why-hero-text">
+                <p>Most financial applications only move money.</p>
+                <p className="why-hero-highlight">
+                  FlowVault enables developers to define how money behaves after deposit.
+                </p>
+                <p className="why-hero-description">
+                  Builders can combine time-locks, routing rules, treasury allocations, automated payouts, reserve systems, and programmable asset flows to create entirely new financial products on Stacks. The purpose of this bounty is to explore and validate these new financial behaviors through real applications.
+                </p>
+              </div>
+              <div className="why-features-grid">
+                <div className="why-feature-card">
+                  <div className="why-card-icon"><Icon name="lock" /></div>
+                  <h4>Time-Locks & Escrow</h4>
+                  <p>Define precise unlock schedules and condition-based release rules for assets.</p>
+                </div>
+                <div className="why-feature-card">
+                  <div className="why-card-icon"><Icon name="split" /></div>
+                  <h4>Treasury & Revenue Splits</h4>
+                  <p>Route funds automatically between team members, community pools, and operational reserves.</p>
+                </div>
+                <div className="why-feature-card">
+                  <div className="why-card-icon"><Icon name="route" /></div>
+                  <h4>Automated Payouts</h4>
+                  <p>Create event-triggered money flows for freelancer payouts, DAO routing, or AI agents.</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -317,52 +365,64 @@ export default function BountyPage() {
         {/* SECTION 3 - WHAT WE ARE LOOKING FOR */}
         <section className="bounty-tracks" id="what-to-build">
           <div className="bounty-section-copy">
-            <span>What We Are Looking For</span>
+            <span className="bounty-section-tag">Bounty Tracks</span>
             <h2>Build New Financial Behaviors</h2>
             <p>We are especially interested in applications that introduce entirely new financial behaviors rather than simply replicating existing payment flows.</p>
           </div>
           <div className="bounty-track-grid">
-            {tracks.map((track) => (
-              <article className="bounty-card bounty-track-card" key={track.title} style={track.badge ? { border: '1px solid var(--accent)', boxShadow: '0 0 20px rgba(255, 100, 0, 0.1)' } : {}}>
-                <div className="bounty-icon-orb"><Icon name={track.icon} /></div>
-                <div>
-                  {track.badge && <span className="bounty-badge" style={{ color: 'var(--accent)', fontSize: '0.875rem', fontWeight: 600, display: 'inline-block', marginBottom: '0.5rem' }}>{track.badge}</span>}
-                  <h3>{track.title}</h3>
-                  <div style={{ marginTop: '1rem' }}>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Examples:</p>
-                    <ul style={{ listStyle: 'disc', paddingLeft: '1.5rem', color: 'var(--text-muted)' }}>
-                      {track.examples.map(ex => <li key={ex}>{ex}</li>)}
-                    </ul>
+            {tracks.map((track) => {
+              const isHighInnovation = track.badge !== undefined;
+              return (
+                <article className={`bounty-card bounty-track-card ${isHighInnovation ? 'high-innovation' : ''}`} key={track.title}>
+                  <div className="bounty-icon-orb"><Icon name={track.icon} /></div>
+                  <div className="track-card-content">
+                    {track.badge && <span className="bounty-badge">{track.badge}</span>}
+                    <h3>{track.title}</h3>
+                    <div className="track-examples">
+                      <p>Examples:</p>
+                      <ul>
+                        {track.examples.map(ex => <li key={ex}>{ex}</li>)}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
 
         {/* SECTION 4 - WHAT WE ARE NOT LOOKING FOR */}
-        <section className="bounty-not-looking-for" style={{ padding: '6rem 2rem', backgroundColor: 'rgba(255, 50, 50, 0.03)', borderTop: '1px solid rgba(255, 50, 50, 0.1)', borderBottom: '1px solid rgba(255, 50, 50, 0.1)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>What We Are <span style={{ color: '#ff5555' }}>NOT</span> Looking For</h2>
+        <section className="bounty-not-looking-for">
+          <div className="contrast-container">
+            <h2>What to Avoid vs. What to Focus On</h2>
+            <p className="contrast-subtitle">Helpful guidelines to align your project with our criteria.</p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#ff5555', fontWeight: 600 }}>Not Eligible</h3>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="contrast-grid">
+              <div className="contrast-card card-avoid">
+                <div className="contrast-card-header">
+                  <span className="card-badge-icon">❌</span>
+                  <h3>Not Eligible</h3>
+                </div>
+                <ul>
                   {notEligible.map(item => (
-                    <li key={item} style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
-                      <span style={{ color: '#ff5555' }}>❌</span> {item}
+                    <li key={item}>
+                      <span className="bullet-icon">✕</span>
+                      <span className="bullet-text">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               
-              <div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#55ff55', fontWeight: 600 }}>What We Care About</h3>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="contrast-card card-focus">
+                <div className="contrast-card-header">
+                  <span className="card-badge-icon">✅</span>
+                  <h3>What We Care About</h3>
+                </div>
+                <ul>
                   {whatWeCareAbout.map(item => (
-                    <li key={item} style={{ display: 'flex', gap: '1rem', color: 'var(--foreground)' }}>
-                      <span style={{ color: '#55ff55' }}>✅</span> {item}
+                    <li key={item}>
+                      <span className="bullet-icon">✓</span>
+                      <span className="bullet-text">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -372,97 +432,110 @@ export default function BountyPage() {
         </section>
 
         {/* SECTION 5 - TECHNICAL REQUIREMENTS */}
-        <section className="bounty-requirements" style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="bounty-section-copy" style={{ marginBottom: '3rem' }}>
-            <h2>Technical Requirements</h2>
+        <section className="bounty-requirements" id="requirements">
+          <div className="bounty-section-header">
+            <span className="bounty-section-tag">Rules</span>
+            <h2>Submission Requirements</h2>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            <div className="bounty-card" style={{ padding: '2.5rem' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>Every Submission Must Include</h3>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {technicalRequirements.map(req => (
-                  <li key={req} style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>✓</div>
-                    {req}
+          <div className="requirements-grid">
+            <div className="requirements-card">
+              <h3>Submission Deliverables</h3>
+              <p className="req-card-sub">Every submission must provide the following artifacts:</p>
+              <ul className="req-list">
+                {technicalRequirements.map((req, idx) => (
+                  <li key={req} className="req-item">
+                    <span className="req-number">{idx + 1}</span>
+                    <span className="req-text">{req}</span>
                   </li>
                 ))}
               </ul>
             </div>
             
-            <div className="bounty-card" style={{ padding: '2.5rem' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Integration Requirements</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Projects must integrate at least one FlowVault primitive (or any combination):</p>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="requirements-card">
+              <h3>Integration Primitives</h3>
+              <p className="req-card-sub">Projects must integrate at least one FlowVault primitive (or any combination):</p>
+              <div className="primitive-tags-container">
                 {integrationRequirements.map(req => (
-                  <li key={req} style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--foreground)', fontWeight: 500 }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>✓</div>
-                    {req}
-                  </li>
+                  <div key={req} className="primitive-badge">
+                    <span className="primitive-icon"><Icon name={req.toLowerCase()} /></span>
+                    <span className="primitive-label">{req} Vault Flow</span>
+                  </div>
                 ))}
-              </ul>
-              <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Projects should execute a real transaction flow on Stacks testnet or mainnet.</p>
+              </div>
+              <div className="req-note-box">
+                <p>Projects should execute a real transaction flow on Stacks testnet or mainnet. The integration must be functional and auditable via explorer links.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* SECTION 8 - JUDGING CRITERIA */}
-        <section className="bounty-judging" id="judging" style={{ padding: '6rem 2rem', background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(255,100,0,0.03) 100%)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div className="bounty-section-copy" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-              <h2>How Winners Are Selected</h2>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-              {judgingCriteria.map(criteria => (
-                <div key={criteria.title} className="bounty-card" style={{ padding: '2rem', display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent)', width: '100px', textAlign: 'right' }}>
-                    {criteria.weight}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{criteria.title}</h3>
-                    <p style={{ color: 'var(--text-muted)' }}>{criteria.desc}</p>
-                  </div>
+        <section className="bounty-judging" id="judging">
+          <div className="bounty-section-header-center">
+            <span className="bounty-section-tag">Evaluation</span>
+            <h2>How Winners Are Selected</h2>
+            <p>Our panel of judges will score submissions based on the following criteria.</p>
+          </div>
+          
+          <div className="judging-grid">
+            {judgingCriteria.map(criteria => (
+              <div key={criteria.title} className="judging-card">
+                <div className="judging-weight-badge">
+                  {criteria.weight}
                 </div>
-              ))}
-            </div>
+                <div className="judging-content">
+                  <h3>{criteria.title}</h3>
+                  <p>{criteria.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
         {/* SECTION 6 - RESOURCES */}
-        <section className="bounty-resources" id="resources" style={{ padding: '6rem 2rem' }}>
+        <section className="bounty-resources" id="resources">
           <div className="bounty-section-copy">
-            <span>Resources</span>
+            <span className="bounty-section-tag">Developer Toolkit</span>
             <h2>Everything You Need To Build</h2>
-            <p>Start building with our complete developer toolkit and documentation.</p>
+            <p>Start building with our complete developer toolkit, libraries, documentation, and reference apps.</p>
           </div>
           <div className="bounty-resource-grid">
-            {resources.map(([icon, title, text]) => (
-              <article className="bounty-card bounty-resource-card" key={title}>
+            {resources.map(([icon, title, text, link]) => (
+              <a className="bounty-card bounty-resource-card group hover:no-underline" key={title} href={link} target="_blank" rel="noopener noreferrer">
                 <div className="bounty-resource-icon"><Icon name={icon} /></div>
-                <div>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{title}</h3>
-                  <p style={{ color: 'var(--text-muted)' }}>{text}</p>
+                <div className="resource-card-content">
+                  <h3 className="flex items-center gap-1.5 font-bold">
+                    {title}
+                    <svg className="w-3.5 h-3.5 opacity-30 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </h3>
+                  <p>{text}</p>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
         </section>
 
         {/* SECTION 7 - PRIZES */}
         <section className="bounty-prizes" id="prizes">
-          <span className="bounty-section-label">Prizes</span>
-          <h2>,000 USDCx Prize Pool</h2>
+          <span className="bounty-section-tag">Rewards</span>
+          <h2>1,000 USDT Prize Pool</h2>
+          <p className="prizes-subtitle">Prizes will be paid directly in USDT on the Stacks network.</p>
+          
           <div className="bounty-prize-grid">
             {prizes.map(([rank, title, amount, tone, desc]) => (
-              <article className={ounty-prize-card bounty-prize-${tone}} key={rank}>
-                <div className="bounty-medal">{rank === 'gift' ? <Icon name="gift" /> : rank}</div>
-                <p>{title}</p>
-                <strong>{amount}</strong>
-                <span>USDCx</span>
-                <p style={{ fontSize: '0.875rem', marginTop: '1rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>{desc}</p>
+              <article className={`bounty-prize-card bounty-prize-${tone}`} key={rank}>
+                <div className="bounty-medal">
+                  {rank === 'gift' ? <Icon name="gift" /> : <span>#{rank}</span>}
+                </div>
+                <h3 className="prize-rank-title">{title}</h3>
+                <div className="prize-amount-group">
+                  <strong>${amount}</strong>
+                  <span>USDT</span>
+                </div>
+                <p className="prize-desc">{desc}</p>
               </article>
             ))}
           </div>
@@ -471,64 +544,78 @@ export default function BountyPage() {
 
         {/* SECTION 9 - TIMELINE */}
         <section className="bounty-timeline" id="timeline">
-          <span className="bounty-section-label">Timeline</span>
+          <span className="bounty-section-tag">Schedule</span>
           <h2>Important Dates</h2>
-          <div className="bounty-timeline-track">
-            {timeline.map(([icon, title, date]) => (
-              <article className="bounty-timeline-item" key={title}>
-                <div className="bounty-icon-orb"><Icon name={icon} /></div>
-                <h3>{title}</h3>
-                <p>{date}</p>
-              </article>
-            ))}
+          <div className="bounty-timeline-container">
+            <div className="timeline-progress-line" />
+            <div className="bounty-timeline-track">
+              {timeline.map(([icon, title, date]) => (
+                <article className="bounty-timeline-item" key={title}>
+                  <div className="bounty-icon-orb"><Icon name={icon} /></div>
+                  <div className="timeline-item-content">
+                    <h3>{title}</h3>
+                    <p>{date}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* SECTION 10 - FAQ */}
-        <section className="bounty-faq" id="faq" style={{ padding: '6rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
-          <div className="bounty-section-copy" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2>FAQ</h2>
+        <section className="bounty-faq" id="faq">
+          <div className="bounty-section-header-center">
+            <span className="bounty-section-tag">Answers</span>
+            <h2>Frequently Asked Questions</h2>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="faq-container">
             {faqs.map((faq, i) => (
-              <details key={i} className="bounty-card" style={{ padding: '1.5rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <summary style={{ fontSize: '1.125rem', fontWeight: 600, outline: 'none', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {faq.q}
-                  <span style={{ color: 'var(--accent)', fontSize: '1.5rem' }}>+</span>
+              <details key={i} className="faq-card">
+                <summary className="faq-summary">
+                  <span>{faq.q}</span>
+                  <span className="faq-toggle-icon">
+                    <svg className="w-5 h-5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </span>
                 </summary>
-                <p style={{ marginTop: '1rem', color: 'var(--text-muted)', lineHeight: '1.6', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>{faq.a}</p>
+                <div className="faq-answer">
+                  <p>{faq.a}</p>
+                </div>
               </details>
             ))}
           </div>
         </section>
 
         {/* FINAL CTA */}
-        <section className="bounty-final-cta" id="register" style={{ padding: '8rem 2rem' }}>
-          <Image src="/logo.png" alt="" width={112} height={112} />
-          <div style={{ maxWidth: '800px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '3rem', marginBottom: '1.5rem', lineHeight: '1.2' }}>Build The Future Of Programmable Money</h2>
-            <p style={{ fontSize: '1.25rem', lineHeight: '1.6', color: 'rgba(255,255,255,0.8)' }}>
-              Use FlowVault to create new financial behaviors on Stacks.
-              <br/><br/>
-              Experiment with treasury automation, programmable savings, creator economies, payroll routing, and entirely new programmable money flows.
-            </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '3rem' }}>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <BountyButton>Register Now</BountyButton>
-                <BountyButton variant="dark" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
-              </div>
-              <div style={{ display: 'flex', gap: '2rem', marginTop: '1.5rem', fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                <span>,000 USDCx Prize Pool</span>
-                <span>•</span>
-                <span>Built on Stacks</span>
+        <section className="bounty-final-cta" id="register">
+          <div className="cta-gradient-glow" />
+          <div className="cta-inner">
+            <Image className="cta-logo" src="/logo.png" alt="" width={112} height={112} />
+            <div className="cta-content">
+              <h2>Build The Future Of Programmable Money</h2>
+              <p>
+                Use FlowVault to create new financial behaviors on Stacks.
+                Experiment with treasury automation, programmable savings, creator economies, payroll routing, and entirely new programmable money flows.
+              </p>
+              
+              <div className="cta-actions-wrapper">
+                <div className="cta-buttons">
+                  <BountyButton href="#register">Register Now</BountyButton>
+                  <BountyButton variant="dark" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
+                </div>
+                <div className="cta-meta">
+                  <span>1,000 USDT Prize Pool</span>
+                  <span className="dot">•</span>
+                  <span>Built on Stacks</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <footer className="bounty-footer">
-          <div>
+          <div className="footer-left">
             <div className="bounty-footer-brand">
               <Image src="/logo.png" alt="FlowVault logo" width={30} height={30} />
               <strong>FlowVault</strong>
