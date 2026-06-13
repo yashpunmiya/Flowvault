@@ -149,9 +149,15 @@ function Icon({ name }: { name: string }) {
   return <svg {...common}>{paths[name]}</svg>;
 }
 
-function Button({ children, variant = "primary" }: { children: React.ReactNode; variant?: "primary" | "ghost" | "dark" }) {
+function Button({ children, variant = "primary", href = "https://earthy-mandrill-c8b.notion.site/ebd//37c2b15361fd80c98165c5a82527efe2" }: { children: React.ReactNode; variant?: "primary" | "ghost" | "dark"; href?: string }) {
+  const isExternal = href?.startsWith("http");
   return (
-    <a className={`button ${variant}`} href="#register">
+    <a 
+      className={`button ${variant}`} 
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+    >
       {children}
       <span>{"->"}</span>
     </a>
@@ -198,7 +204,7 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <Button>Register Now</Button>
-            <Button variant="ghost">Join Discord</Button>
+            <Button href="#resources" variant="ghost">Join Discord</Button>
           </div>
           <div className="built-on">
             <small>Built on</small>

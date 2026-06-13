@@ -222,8 +222,14 @@ function Icon({ name }: { name: string }) {
 }
 
 function BountyButton({ children, variant = "primary", href = "#register" }: { children: ReactNode; variant?: "primary" | "dark" | "outline"; href?: string }) {
+  const isExternal = href?.startsWith("http");
   return (
-    <a className={`bounty-button bounty-button-${variant} group`} href={href}>
+    <a 
+      className={`bounty-button bounty-button-${variant} group`} 
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+    >
       <span>{children}</span>
       {variant !== "outline" && (
         <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -278,7 +284,7 @@ export default function BountyPage() {
               Use locks, splits, treasury routing, payroll automation, reserve systems, creator payouts, and entirely new programmable money flows.
             </p>
             <div className="bounty-hero-actions">
-              <BountyButton href="#register">Register for Bounty</BountyButton>
+              <BountyButton href="https://earthy-mandrill-c8b.notion.site/ebd//37c2b15361fd80c98165c5a82527efe2">Register & Submit Project</BountyButton>
               <BountyButton variant="outline" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
             </div>
             
@@ -601,7 +607,7 @@ export default function BountyPage() {
               
               <div className="cta-actions-wrapper">
                 <div className="cta-buttons">
-                  <BountyButton href="#register">Register Now</BountyButton>
+                  <BountyButton href="https://earthy-mandrill-c8b.notion.site/ebd//37c2b15361fd80c98165c5a82527efe2">Register & Submit Project</BountyButton>
                   <BountyButton variant="dark" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
                 </div>
                 <div className="cta-meta">
