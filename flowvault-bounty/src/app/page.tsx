@@ -205,6 +205,7 @@ export default function Home() {
           <div className="hero-actions">
             <Button>Register Now</Button>
             <Button href="#resources" variant="ghost">Join Discord</Button>
+            <Button href="https://t.me/+3ke553QKoj0yZTY1" variant="ghost">Join Telegram</Button>
           </div>
           <div className="built-on">
             <small>Built on</small>
@@ -325,7 +326,10 @@ export default function Home() {
           <h2>Ready to build the future of programmable finance?</h2>
           <p>Join the FlowVault builder bounty and start building today.</p>
         </div>
-        <Button>Register Now</Button>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button>Register Now</Button>
+          <Button href="https://t.me/+3ke553QKoj0yZTY1" variant="ghost">Join Telegram</Button>
+        </div>
       </section>
 
       <footer>

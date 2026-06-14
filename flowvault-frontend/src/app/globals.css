@@ -514,6 +514,28 @@ body {
   transform: translateY(-2px);
 }
 
+.bounty-button-telegram {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0088cc 0%, #24a1de 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 15px rgba(0, 136, 204, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.bounty-button-telegram:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #0099e6 0%, #2ea9e6 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 8px 25px rgba(0, 136, 204, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.bounty-button-telegram:active {
+  transform: translateY(0);
+}
+
 /* Stacks Brand Mark */
 .bounty-stacks-mark {
   display: inline-flex;

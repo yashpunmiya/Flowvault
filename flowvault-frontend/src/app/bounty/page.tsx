@@ -222,7 +222,7 @@ function Icon({ name }: { name: string }) {
   return <svg {...common}>{paths[name]}</svg>;
 }
 
-function BountyButton({ children, variant = "primary", href = "#register" }: { children: ReactNode; variant?: "primary" | "dark" | "outline"; href?: string }) {
+function BountyButton({ children, variant = "primary", href = "#register" }: { children: ReactNode; variant?: "primary" | "dark" | "outline" | "telegram"; href?: string }) {
   const isExternal = href?.startsWith("http");
   return (
     <a 
@@ -232,9 +232,14 @@ function BountyButton({ children, variant = "primary", href = "#register" }: { c
       rel={isExternal ? "noopener noreferrer" : undefined}
     >
       <span>{children}</span>
-      {variant !== "outline" && (
+      {variant !== "outline" && variant !== "telegram" && (
         <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      )}
+      {variant === "telegram" && (
+        <svg className="w-4.5 h-4.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
         </svg>
       )}
     </a>
@@ -287,6 +292,7 @@ export default function BountyPage() {
             <div className="bounty-hero-actions">
               <BountyButton href="https://earthy-mandrill-c8b.notion.site/ebd//37c2b15361fd80c98165c5a82527efe2">Register & Submit Project</BountyButton>
               <BountyButton variant="outline" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
+              <BountyButton variant="telegram" href="https://t.me/+3ke553QKoj0yZTY1">Join Telegram</BountyButton>
             </div>
             
             <div className="bounty-hero-badges">
@@ -613,6 +619,7 @@ export default function BountyPage() {
                 <div className="cta-buttons">
                   <BountyButton href="https://earthy-mandrill-c8b.notion.site/ebd//37c2b15361fd80c98165c5a82527efe2">Register & Submit Project</BountyButton>
                   <BountyButton variant="dark" href="https://docs.flow-vault.dev">View Documentation</BountyButton>
+                  <BountyButton variant="telegram" href="https://t.me/+3ke553QKoj0yZTY1">Join Telegram</BountyButton>
                 </div>
                 <div className="cta-meta">
                   <span>1,000 USDT Prize Pool</span>
