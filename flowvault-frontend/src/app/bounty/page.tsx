@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { SiteHeader } from "@/components/SiteHeader";
+import { BountyCountdown } from "@/components/BountyCountdown";
 
 const stacksLogo =
   "https://cdn.prod.website-files.com/618b0aafa4afde65f2fe38fe/65dbdd6c87cf20baca9ac049_stacks-logo-navbar.svg";
@@ -93,11 +94,11 @@ const judgingCriteria = [
 ];
 
 const timeline = [
-  ["rocket", "Onboarding", "June 12 – June 18"],
-  ["code", "Build Period", "June 19 – June 25"],
-  ["send", "Submission", "June 25 (23:59 UTC)"],
-  ["chat", "Judging", "June 26 – June 27"],
-  ["trophy", "Winners", "June 28, 2026"]
+  ["rocket", "Onboarding", "June 15 – June 21"],
+  ["code", "Build Period", "June 22 – June 28"],
+  ["send", "Submission", "June 28 (23:59 UTC)"],
+  ["chat", "Judging", "June 29 – June 30"],
+  ["trophy", "Winners", "July 1, 2026"]
 ];
 
 const faqs = [
@@ -552,6 +553,9 @@ export default function BountyPage() {
         <section className="bounty-timeline" id="timeline">
           <span className="bounty-section-tag">Schedule</span>
           <h2>Important Dates</h2>
+          <div className="my-10">
+            <BountyCountdown />
+          </div>
           <div className="bounty-timeline-container">
             <div className="timeline-progress-line" />
             <div className="bounty-timeline-track">
