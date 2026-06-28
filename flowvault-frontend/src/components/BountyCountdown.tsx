@@ -5,8 +5,8 @@ import { useEffect, useState, useCallback } from "react";
 export function BountyCountdown() {
   // Event Start: June 15, 2026 at 09:00:00 AM (Timezone: Asia/Kolkata +05:30)
   const START_DATE = new Date("2026-06-15T09:00:00+05:30").getTime();
-  // Submission Deadline: June 28, 2026 at 23:59:00 PM (Timezone: Asia/Kolkata +05:30)
-  const SUBMIT_DATE = new Date("2026-06-28T23:59:00+05:30").getTime();
+  // Submission Deadline: July 5, 2026 at 23:59:00 PM (Timezone: Asia/Kolkata +05:30)
+  const SUBMIT_DATE = new Date("2026-07-05T23:59:00+05:30").getTime();
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
