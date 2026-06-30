@@ -26,9 +26,9 @@ const prizes = [
 const timeline = [
   ["rocket", "Bounty Launch", "June 15, 2026"],
   ["code", "Build Period Starts", "June 15, 2026"],
-  ["chat", "Midpoint Check-in", "June 29, 2026"],
-  ["send", "Submission Deadline", "July 5, 2026"],
-  ["trophy", "Winners Announced", "July 12, 2026"]
+  ["chat", "Midpoint Check-in", "July 3, 2026"],
+  ["send", "Submission Deadline", "July 9, 2026"],
+  ["trophy", "Winners Announced", "July 16, 2026"]
 ];
 
 const resources = [

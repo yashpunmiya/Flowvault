@@ -95,10 +95,10 @@ const judgingCriteria = [
 
 const timeline = [
   ["rocket", "Onboarding", "June 15 – June 21"],
-  ["code", "Build Period", "June 22 – July 5"],
-  ["send", "Submission", "July 5 (23:59 UTC)"],
-  ["chat", "Judging", "July 6 – July 7"],
-  ["trophy", "Winners", "July 8, 2026"]
+  ["code", "Build Period", "June 22 – July 9"],
+  ["send", "Submission", "July 9 (23:59 UTC)"],
+  ["chat", "Judging", "July 10 – July 11"],
+  ["trophy", "Winners", "July 12, 2026"]
 ];
 
 const faqs = [
