@@ -77,7 +77,7 @@ export function FlowVaultDemo() {
           functionArgs: call.functionArgs,
           network: call.network,
           postConditionMode,
-          postConditions: call.postConditions,
+          postConditions: call.postConditions as any,
         });
       },
     });
