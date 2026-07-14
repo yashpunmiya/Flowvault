@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { createFlowVaultSdk } from "@/lib/flowvault";
-import { createStrategy } from "@/lib/savings-flow";
+import { createStrategy, waitForTransactionSuccess } from "@/lib/savings-flow";
 import {
   buildSavingsSuccessState,
   parseDepositAmount,
   type SavingsSuccessState,
 } from "@/lib/strategy";
 
-type DepositStep = "idle" | "strategy" | "deposit";
+type DepositStep = "idle" | "strategy" | "confirming" | "deposit";
 
 export function useSavingsVault(walletAddress: string | null) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +46,9 @@ export function useSavingsVault(walletAddress: string | null) {
         walletAddress,
         depositMicro: parsed.microAmount,
       });
+
+      setStep("confirming");
+      await waitForTransactionSuccess(created.txId);
 
       setStep("deposit");
       const depositTransaction = await sdk.deposit(parsed.microAmount, {

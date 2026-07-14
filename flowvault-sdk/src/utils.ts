@@ -24,21 +24,44 @@ const CONTRACT_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/;
 // ---------------------------------------------------------------------------
 
 /**
- * Assert that `address` is a syntactically valid Stacks address.
+ * Assert that `address` is a syntactically valid Stacks address or contract principal.
  * Throws {@link InvalidAddressError} on failure.
  */
 export function assertValidAddress(address: string): void {
-  if (!address || !validateStacksAddress(address)) {
+  if (!address) {
+    throw new InvalidAddressError(address);
+  }
+  if (address.includes(".")) {
+    const parts = address.split(".");
+    if (
+      parts.length !== 2 ||
+      !validateStacksAddress(parts[0]) ||
+      !CONTRACT_NAME_PATTERN.test(parts[1])
+    ) {
+      throw new InvalidAddressError(address);
+    }
+    return;
+  }
+  if (!validateStacksAddress(address)) {
     throw new InvalidAddressError(address);
   }
 }
 
 /**
- * Check whether `address` is a valid Stacks address without throwing.
+ * Check whether `address` is a valid Stacks address or contract principal without throwing.
  */
 export function isValidAddress(address: string): boolean {
   try {
-    return !!address && validateStacksAddress(address);
+    if (!address) return false;
+    if (address.includes(".")) {
+      const parts = address.split(".");
+      return (
+        parts.length === 2 &&
+        validateStacksAddress(parts[0]) &&
+        CONTRACT_NAME_PATTERN.test(parts[1])
+      );
+    }
+    return validateStacksAddress(address);
   } catch {
     return false;
   }

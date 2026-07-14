@@ -27,10 +27,22 @@ describe("isValidAddress", () => {
     expect(isValidAddress("STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD")).toBe(true);
   });
 
+  it("should accept valid contract principals", () => {
+    expect(isValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx")).toBe(true);
+    expect(isValidAddress("STD7QG84VQQ0C35SZM2EYTHZV4M8FQ0R7YNSQWPD.flowvault-v2")).toBe(true);
+  });
+
   it("should reject empty and garbage strings", () => {
     expect(isValidAddress("")).toBe(false);
     expect(isValidAddress("not-an-address")).toBe(false);
     expect(isValidAddress("12345")).toBe(false);
+  });
+
+  it("should reject invalid contract principals", () => {
+    expect(isValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.")).toBe(false);
+    expect(isValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.1usdcx")).toBe(false);
+    expect(isValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx.extra")).toBe(false);
+    expect(isValidAddress("bad.usdcx")).toBe(false);
   });
 });
 
@@ -41,8 +53,18 @@ describe("assertValidAddress", () => {
     ).not.toThrow();
   });
 
+  it("should not throw for a valid contract principal", () => {
+    expect(() =>
+      assertValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx")
+    ).not.toThrow();
+  });
+
   it("should throw InvalidAddressError for an invalid address", () => {
     expect(() => assertValidAddress("bad")).toThrow(InvalidAddressError);
+  });
+
+  it("should throw InvalidAddressError for an invalid contract principal", () => {
+    expect(() => assertValidAddress("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.1usdcx")).toThrow(InvalidAddressError);
   });
 
   it("should throw for empty string", () => {

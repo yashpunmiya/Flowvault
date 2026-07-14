@@ -9,10 +9,13 @@ describe("savings deposit flow", () => {
       deposit: vi.fn().mockResolvedValue({ txId: "0xdeposit", status: "success" }),
     };
 
+    const waitForStrategyConfirmation = vi.fn().mockResolvedValue(undefined);
+
     const result = await runSavingsDeposit({
       sdk,
       walletAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
       depositAmount: "100",
+      waitForStrategyConfirmation,
     });
 
     expect(sdk.getCurrentBlockHeight).toHaveBeenCalledWith(

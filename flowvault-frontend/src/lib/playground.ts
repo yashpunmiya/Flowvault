@@ -324,18 +324,22 @@ export function buildDeveloperPreviewSnippet(params: {
 }): string {
   const { lockAmountMicro, lockDurationBlocks, splitAmountMicro, splitAddress } = params;
 
-  const splitAddressValue = splitAddress.trim() ? `"${splitAddress.trim()}"` : "undefined";
+  const splitAddressValue = splitAddress.trim() ? `"${splitAddress.trim()}"` : "null";
 
   return `import { FlowVault } from "flowvault-sdk";
 
-const flowvault = new FlowVault({ network: "testnet" });
+const flowvault = new FlowVault({
+  network: "testnet",
+  senderAddress: "ST...", // connected wallet address
+});
+
+// Fetch current block height to calculate unlock block height
+const currentBlock = await flowvault.getCurrentBlockHeight("ST...");
 
 await flowvault.createStrategy({
-  lockAmount: ${lockAmountMicro},
-  lockDuration: ${lockDurationBlocks},
-  split: {
-    address: ${splitAddressValue},
-    amount: ${splitAmountMicro}
-  }
+  lockAmount: "${lockAmountMicro}",
+  lockUntilBlock: currentBlock + ${lockDurationBlocks},
+  splitAddress: ${splitAddressValue},
+  splitAmount: "${splitAmountMicro}",
 });`;
 }

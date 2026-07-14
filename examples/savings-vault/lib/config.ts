@@ -7,6 +7,11 @@ function readNetwork(): NetworkName {
 
 export const FLOWVAULT_NETWORK = readNetwork();
 
+export const FLOWVAULT_API_BASE =
+  FLOWVAULT_NETWORK === "mainnet"
+    ? "https://api.hiro.so"
+    : "https://api.testnet.hiro.so";
+
 export const FLOWVAULT_CONTRACTS = {
   contractAddress:
     process.env.NEXT_PUBLIC_FLOWVAULT_CONTRACT_ADDRESS ??

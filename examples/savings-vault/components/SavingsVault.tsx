@@ -29,9 +29,11 @@ export function SavingsVault() {
   const pendingMessage =
     savingsVault.step === "strategy"
       ? "Creating savings strategy in wallet..."
-      : savingsVault.step === "deposit"
-        ? "Submitting deposit in wallet..."
-        : null;
+      : savingsVault.step === "confirming"
+        ? "Confirming savings strategy on Stacks..."
+        : savingsVault.step === "deposit"
+          ? "Submitting deposit in wallet..."
+          : null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

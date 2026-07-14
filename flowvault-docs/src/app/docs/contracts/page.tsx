@@ -61,6 +61,16 @@ export default function ContractsPage() {
           <li><code>splitAddress</code>: optional principal receiving the split transfer.</li>
           <li><code>splitAmount</code>: fixed per-deposit transfer amount.</li>
         </ul>
+
+        <div className="doc-callout" style={{ marginTop: '1rem' }}>
+          <strong>Lock Duration vs Block Height:</strong> The smart contract rules enforce locks using absolute block height (<code>lockUntilBlock</code>). In your UI, you should query duration (in blocks, e.g. 144 blocks) and calculate:
+          <div style={{ fontFamily: 'monospace', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', marginTop: '0.25rem' }}>
+            unlockBlock = currentBlock + duration
+          </div>
+          <p style={{ marginTop: '0.5rem' }}>
+            Example: If <code>currentBlock</code> is 12,000, and you want to lock for 1,000 blocks, set <code>lockUntilBlock</code> to 13,000.
+          </p>
+        </div>
       </section>
 
       <section id="routing" className="doc-section-card">
