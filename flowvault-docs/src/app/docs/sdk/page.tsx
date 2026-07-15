@@ -20,7 +20,7 @@ export default function SdkPage() {
     >
       <section id="install" className="doc-section-card">
         <h2>Installation</h2>
-        <pre className="doc-code">npm install flowvault-sdk@0.1.1</pre>
+        <pre className="doc-code">npm install flowvault-sdk@0.1.3</pre>
         <p>
           Pin exact version in production apps when contract interfaces are
           tightly controlled, then upgrade intentionally after testnet checks.
@@ -94,7 +94,7 @@ export default function SdkPage() {
       <section id="practices" className="doc-section-card">
         <h2>Production Practices</h2>
         <ul>
-          <li>Validate network and contract principals at process startup.</li>
+          <li>Validate network and contract principals at process startup. Standard STX principals and contract principals (e.g. <code>ST1PQ...GM.usdcx</code>) are fully supported by SDK validations in v0.1.3+.</li>
           <li>Use wallet executor mode for browser clients, never sender keys.</li>
           <li>Poll read-only state after writes until expected balance transition appears.</li>
           <li>Surface typed SDK errors directly for better support diagnostics.</li>
