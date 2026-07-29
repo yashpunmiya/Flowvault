@@ -83,7 +83,7 @@ const prizes = [
   ["1", "First Place", "350", "gold", "Most innovative and complete FlowVault integration."],
   ["2", "Second Place", "200", "silver", "Strong execution and ecosystem value."],
   ["3", "Third Place", "150", "violet", "Promising concept with solid implementation."],
-  ["gift", "Builder Awards", "300", "purple", "Distributed across multiple builders for SDK improvements, docs, feedback, etc."]
+  ["gift", "Builder Awards", "350", "purple", "Distributed across multiple builders for SDK improvements, docs, feedback, etc.", "up to"]
 ];
 
 const judgingCriteria = [
@@ -538,13 +538,18 @@ export default function BountyPage() {
           <p className="prizes-subtitle">Prizes will be paid directly in USDT on the Stacks network.</p>
           
           <div className="bounty-prize-grid">
-            {prizes.map(([rank, title, amount, tone, desc]) => (
+            {prizes.map(([rank, title, amount, tone, desc, prefix]) => (
               <article className={`bounty-prize-card bounty-prize-${tone}`} key={rank}>
                 <div className="bounty-medal">
                   {rank === 'gift' ? <Icon name="gift" /> : <span>#{rank}</span>}
                 </div>
                 <h3 className="prize-rank-title">{title}</h3>
                 <div className="prize-amount-group">
+                  {prefix && (
+                    <span className="text-[8px] font-normal text-white/30 tracking-tighter opacity-30 select-none uppercase -mr-0.5 self-center">
+                      {prefix}
+                    </span>
+                  )}
                   <strong>${amount}</strong>
                   <span>USDT</span>
                 </div>
