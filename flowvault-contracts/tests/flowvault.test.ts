@@ -70,6 +70,25 @@ function getVaultState(user: string) {
 }
 
 describe("FlowVault Contract Tests", () => {
+  // The vault now pins its accepted token; point it at the local mock so deposits work.
+  beforeEach(() => {
+    simnet.callPublicFn(
+      flowvaultContract,
+      "set-allowed-token",
+      [Cl.contractPrincipal(deployer, "mock-usdcx")],
+      deployer
+    );
+  });
+
+  it("rejects deposit/withdraw whose token isn't the allowed token (drain guard)", () => {
+    // Repoint the allowed token away from the mock, then try to use the mock —
+    // mirrors an attacker passing a token the vault doesn't actually hold.
+    simnet.callPublicFn(flowvaultContract, "set-allowed-token", [Cl.principal(wallet3)], deployer);
+    mintTokens(wallet1, 1000);
+    expect(deposit(wallet1, 100).result).toBeErr(Cl.uint(1012));
+    expect(withdraw(wallet1, 100).result).toBeErr(Cl.uint(1012));
+  });
+
   describe("Initialization", () => {
     it("ensures simnet is well initialized", () => {
       expect(simnet.blockHeight).toBeDefined();

@@ -37,6 +37,7 @@
 (define-constant ERR-ARITHMETIC-OVERFLOW (err u1009))
 (define-constant ERR-LOCK-EXCEEDS-HOLD (err u1010))
 (define-constant ERR-SPLIT-TO-SELF (err u1011))
+(define-constant ERR-INVALID-TOKEN (err u1012))
 
 ;; ========================
 ;; Data Maps
@@ -62,6 +63,12 @@
     lock-until-block: uint
   }
 )
+
+;; The only token this vault accepts. Pinned so deposit/withdraw can't be called
+;; with a different (worthless) SIP-010 to drain the pooled real balance, since
+;; balance accounting is token-agnostic. Defaults to testnet USDCx; CONTRACT-OWNER
+;; can repoint it (mainnet deployment, tests, etc.).
+(define-data-var allowed-token principal 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdcx)
 
 ;; ========================
 ;; Read-Only Functions
@@ -119,6 +126,11 @@
 ;; Get current block height (for frontend reference)
 (define-read-only (get-current-block-height)
   stacks-block-height
+)
+
+;; The token principal this vault accepts.
+(define-read-only (get-allowed-token)
+  (var-get allowed-token)
 )
 
 ;; ========================
@@ -202,6 +214,11 @@
     ;; Validate amount > 0
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
     
+    ;; Reject any token other than the one this vault accepts. Without this a
+    ;; caller could deposit a worthless SIP-010 and later withdraw real USDCx,
+    ;; since the balance accounting is token-agnostic (token-confusion drain).
+    (asserts! (is-eq (contract-of token) (var-get allowed-token)) ERR-INVALID-TOKEN)
+
     ;; Validate routing rules don't exceed deposit amount (overflow check)
     ;; NOTE: This guard runs before lock-vs-hold checks, so contradictory routing
     ;; configs can fail with ERR-ROUTING-EXCEEDS-DEPOSIT first.
@@ -300,6 +317,9 @@
     ;; Validate amount > 0
     (asserts! (> amount u0) ERR-INVALID-AMOUNT)
     
+    ;; Reject any token other than the one this vault accepts (see deposit).
+    (asserts! (is-eq (contract-of token) (var-get allowed-token)) ERR-INVALID-TOKEN)
+
     ;; Validate sufficient unlocked balance
     (asserts! (<= amount available-balance) ERR-FUNDS-LOCKED)
     
@@ -344,6 +364,15 @@
 (define-public (clear-routing-rules)
   (begin
     (map-delete routing-rules tx-sender)
+    (ok true)
+  )
+)
+
+;; Owner-only: set the token principal this vault accepts.
+(define-public (set-allowed-token (new-token principal))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (var-set allowed-token new-token)
     (ok true)
   )
 )
